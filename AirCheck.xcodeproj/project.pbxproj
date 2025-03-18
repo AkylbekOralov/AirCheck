@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 6333342F2D89F6EA0082D0CB /* MapboxMaps */; };
 		63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA9EFD2D89EB08007B5340 /* SnapKit */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */,
 				63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +86,7 @@
 			name = AirCheck;
 			packageProductDependencies = (
 				63CA9EFD2D89EB08007B5340 /* SnapKit */,
+				6333342F2D89F6EA0082D0CB /* MapboxMaps */,
 			);
 			productName = AirCheck;
 			productReference = 63CA9EC32D89E605007B5340 /* AirCheck.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63CA9EC42D89E605007B5340 /* Products */;
@@ -344,6 +348,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mapbox/mapbox-maps-ios.git";
+			requirement = {
+				kind = exactVersion;
+				version = 11.10.1;
+			};
+		};
 		63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -355,6 +367,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6333342F2D89F6EA0082D0CB /* MapboxMaps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
+			productName = MapboxMaps;
+		};
 		63CA9EFD2D89EB08007B5340 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */;
