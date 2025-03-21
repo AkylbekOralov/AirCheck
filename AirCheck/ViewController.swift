@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let cameraOptions = CameraOptions(center: CLLocationCoordinate2D(latitude: 37.26301831966747, longitude: -121.97647612483807), zoom: 10)
+        let cameraOptions = CameraOptions(center: CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829), zoom: 10)
         let options = MapInitOptions(cameraOptions: cameraOptions, styleURI: .standard)
         
         mapView = MapView(frame: view.bounds, mapInitOptions: options)
@@ -33,7 +33,7 @@ class ViewController: UIViewController {
         mapView.gestures.delegate = self
         
         // Update the camera's centerCoordinate when a locationUpdate is received.
-        startTracking()
+//        startTracking()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
