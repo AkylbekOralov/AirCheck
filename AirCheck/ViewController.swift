@@ -13,89 +13,152 @@ class ViewController: UIViewController {
     
     var mapView: MapView!
     private lazy var trackingButton = UIButton(frame: .zero)
-    private var locationTrackingCancellation: AnyCancelable?
+    
+    private var lastCameraCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
+    private var lastZoom: CGFloat = 8
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let cameraOptions = CameraOptions(center: CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829), zoom: 10)
-        let options = MapInitOptions(cameraOptions: cameraOptions, styleURI: .standard)
+        setupMapView()
+        setupTrackingButton()
+        centerMapOnUserLocationOrFallback()
         
-        mapView = MapView(frame: view.bounds, mapInitOptions: options)
+        setupCameraListener()
+    }
+    
+    private func setupMapView() {
+        let fallbackCamera = CameraOptions(center: lastCameraCenter, zoom: lastZoom)
+        let initOptions = MapInitOptions(cameraOptions: fallbackCamera, styleURI: .standard)
+        
+        mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(mapView)
         
-        setupLocationButton()
-        
-        let configuration = Puck2DConfiguration.makeDefault(showBearing: true)
-        mapView.location.options.puckType = .puck2D(configuration)
-        
-        mapView.gestures.delegate = self
-        
-        // Update the camera's centerCoordinate when a locationUpdate is received.
-//        startTracking()
+        // Show blue location dot
+        mapView.location.options.puckType = .puck2D()
     }
     
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
-    
-    private func setupLocationButton() {
-        trackingButton.addTarget(self, action: #selector(switchTracking), for: .touchUpInside)
+    private func setupCameraListener() {
+        mapView.mapboxMap.onEvery(event: .mapIdle) { [weak self] _ in
+            guard let self = self else { return }
 
+            let cameraState = self.mapView.mapboxMap.cameraState
+            let center = cameraState.center
+            let zoom = cameraState.zoom
+
+            let centerThreshold: CLLocationDegrees = 0.03
+            let zoomThreshold: CGFloat = 0.4
+
+            let latDiff = abs(center.latitude - self.lastCameraCenter.latitude)
+            let lonDiff = abs(center.longitude - self.lastCameraCenter.longitude)
+            let zoomDiff = abs(zoom - self.lastZoom)
+
+            if latDiff < centerThreshold && lonDiff < centerThreshold && zoomDiff < zoomThreshold {
+                return
+            }
+
+            self.lastCameraCenter = center
+            self.lastZoom = zoom
+
+            // Просто вызываем нашу общую функцию
+            printVisibleRegionInfo(mapView: self.mapView)
+        }
+    }
+    
+    func printVisibleRegionInfo(mapView: MapView) {
+        let cameraState = mapView.mapboxMap.cameraState
+        let center = cameraState.center
+        let zoom = cameraState.zoom
+
+        let cameraOptions = CameraOptions(center: center, zoom: zoom)
+        let bounds = try? mapView.mapboxMap.coordinateBounds(for: cameraOptions)
+
+        if let bounds = bounds {
+            let north = bounds.northeast.latitude
+            let south = bounds.southwest.latitude
+            let east = bounds.northeast.longitude
+            let west = bounds.southwest.longitude
+
+            print("🌍 Видимая область карты:")
+            print("  Север (Top): \(north)")
+            print("  Юг (Bottom): \(south)")
+            print("  Восток (Right): \(east)")
+            print("  Запад (Left): \(west)")
+            print("🔍 Zoom Level: \(zoom)")
+            print("——————————")
+        } else {
+            print("⚠️ Не удалось получить границы карты.")
+        }
+    }
+    
+    private func setupTrackingButton() {
         trackingButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
-
-        let buttonWidth = 44.0
-        trackingButton.translatesAutoresizingMaskIntoConstraints = false
+        trackingButton.tintColor = .systemBlue
         trackingButton.backgroundColor = UIColor(white: 0.97, alpha: 1)
-        trackingButton.layer.cornerRadius = buttonWidth/2
-        trackingButton.layer.shadowOffset = CGSize(width: -1, height: 1)
+        trackingButton.layer.cornerRadius = 22
         trackingButton.layer.shadowColor = UIColor.black.cgColor
-        trackingButton.layer.shadowOpacity = 0.5
+        trackingButton.layer.shadowOpacity = 0.3
+        trackingButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        trackingButton.layer.shadowRadius = 2
+        
+        trackingButton.addTarget(self, action: #selector(centerMapOnUserLocation), for: .touchUpInside)
+        
+        trackingButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackingButton)
-
+        
         NSLayoutConstraint.activate([
             trackingButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             trackingButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -48),
-            trackingButton.widthAnchor.constraint(equalTo: trackingButton.heightAnchor),
-            trackingButton.widthAnchor.constraint(equalToConstant: buttonWidth)
+            trackingButton.widthAnchor.constraint(equalToConstant: 44),
+            trackingButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
     
-    @objc func switchTracking() {
-        let isTrackingNow = locationTrackingCancellation != nil
-        if isTrackingNow {
-            stopTracking()
+    private func centerMapOnUserLocationOrFallback() {
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
         } else {
-            startTracking()
+            // Ждём первое обновление в течение 2 секунд, иначе fallback
+            var didCenter = false
+            let observer = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                guard didCenter == false else { return }
+                didCenter = true
+                self?.moveCamera(to: coordinate, zoom: 12)
+            }
+            
+            // Fallback через 2 секунды
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                guard let self = self else { return }
+                if didCenter == false {
+                    print("⚠️ Не удалось получить локацию — fallback на Алматы")
+                    self.moveCamera(to: self.lastCameraCenter, zoom: self.lastZoom)
+                }
+                observer.cancel()
+            }
         }
     }
     
-    private func startTracking() {
-        locationTrackingCancellation = mapView.location.onLocationChange.observe { [weak mapView] newLocation in
-            guard let location = newLocation.last, let mapView else { return }
-            mapView.camera.ease(
-                to: CameraOptions(center: location.coordinate, zoom: 15),
-                duration: 1.3)
+    @objc private func centerMapOnUserLocation() {
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
+        } else {
+            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                self?.moveCamera(to: coordinate, zoom: 12)
+            }
         }
-
-        trackingButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
     }
-
-    func stopTracking() {
-        trackingButton.setImage(UIImage(systemName: "location"), for: .normal)
-        locationTrackingCancellation = nil
+    
+    private func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+        mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
+        
+        // Обновим lastCameraCenter и zoom
+        self.lastCameraCenter = coordinate
+        self.lastZoom = zoom
+        
+        printVisibleRegionInfo(mapView: self.mapView)
     }
     
 }
-
-extension ViewController: GestureManagerDelegate {
-    public func gestureManager(_ gestureManager: MapboxMaps.GestureManager, didBegin gestureType: MapboxMaps.GestureType) {
-        stopTracking()
-    }
-
-    public func gestureManager(_ gestureManager: MapboxMaps.GestureManager, didEnd gestureType: MapboxMaps.GestureType, willAnimate: Bool) {}
-
-    public func gestureManager(_ gestureManager: MapboxMaps.GestureManager, didEndAnimatingFor gestureType: MapboxMaps.GestureType) {}
-}
-
