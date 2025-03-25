@@ -1,6 +1,15 @@
 {
-  "originHash" : "cd106481e918153d53e729d2b3f68ed428d6d356ebb9c922d27cfca248a27b13",
+  "originHash" : "e37c2198cbe6d537fa09d4eced12203acac83e99ef3d8681e7550f61bcf77225",
   "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
+        "version" : "5.10.2"
+      }
+    },
     {
       "identity" : "mapbox-common-ios",
       "kind" : "remoteSourceControl",

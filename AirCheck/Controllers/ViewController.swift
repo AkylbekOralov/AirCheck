@@ -17,6 +17,9 @@ class ViewController: UIViewController {
     private var lastCameraCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     private var lastZoom: CGFloat = 8
     
+    private var annotationManager: PointAnnotationManager?
+    let aqiService = AQIService()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -26,7 +29,10 @@ class ViewController: UIViewController {
         
         setupCameraListener()
     }
-    
+}
+
+// MapView Setup
+extension ViewController {
     private func setupMapView() {
         let fallbackCamera = CameraOptions(center: lastCameraCenter, zoom: lastZoom)
         let initOptions = MapInitOptions(cameraOptions: fallbackCamera, styleURI: .standard)
@@ -34,9 +40,11 @@ class ViewController: UIViewController {
         mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(mapView)
-        
-        // Show blue location dot
+
         mapView.location.options.puckType = .puck2D()
+        
+        let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 3.0)
+        try? mapView.mapboxMap.setCameraBounds(with: bounds)
     }
     
     private func setupCameraListener() {
@@ -60,38 +68,52 @@ class ViewController: UIViewController {
 
             self.lastCameraCenter = center
             self.lastZoom = zoom
-
-            // Просто вызываем нашу общую функцию
-            printVisibleRegionInfo(mapView: self.mapView)
+            
+            self.fetchAQIDataAndDisplay()
         }
     }
-    
-    func printVisibleRegionInfo(mapView: MapView) {
-        let cameraState = mapView.mapboxMap.cameraState
-        let center = cameraState.center
-        let zoom = cameraState.zoom
+}
 
-        let cameraOptions = CameraOptions(center: center, zoom: zoom)
-        let bounds = try? mapView.mapboxMap.coordinateBounds(for: cameraOptions)
-
-        if let bounds = bounds {
-            let north = bounds.northeast.latitude
-            let south = bounds.southwest.latitude
-            let east = bounds.northeast.longitude
-            let west = bounds.southwest.longitude
-
-            print("🌍 Видимая область карты:")
-            print("  Север (Top): \(north)")
-            print("  Юг (Bottom): \(south)")
-            print("  Восток (Right): \(east)")
-            print("  Запад (Left): \(west)")
-            print("🔍 Zoom Level: \(zoom)")
-            print("——————————")
+// Location Handling
+extension ViewController {
+    private func centerMapOnUserLocationOrFallback() {
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
         } else {
-            print("⚠️ Не удалось получить границы карты.")
+            // Ждём первое обновление в течение 2 секунд, иначе fallback
+            var didCenter = false
+            let observer = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                guard didCenter == false else { return }
+                didCenter = true
+                self?.moveCamera(to: coordinate, zoom: 12)
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                guard let self = self else { return }
+                if didCenter == false {
+                    print("⚠️ Не удалось получить локацию — fallback на Алматы")
+                    self.moveCamera(to: self.lastCameraCenter, zoom: self.lastZoom)
+                }
+                observer.cancel()
+            }
         }
     }
     
+    @objc private func centerMapOnUserLocation() {
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
+        } else {
+            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                self?.moveCamera(to: coordinate, zoom: 12)
+            }
+        }
+    }
+}
+
+// Location Button
+extension ViewController {
     private func setupTrackingButton() {
         trackingButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
         trackingButton.tintColor = .systemBlue
@@ -114,51 +136,72 @@ class ViewController: UIViewController {
             trackingButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
-    
-    private func centerMapOnUserLocationOrFallback() {
-        if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-        } else {
-            // Ждём первое обновление в течение 2 секунд, иначе fallback
-            var didCenter = false
-            let observer = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                guard let coordinate = locations.last?.coordinate else { return }
-                guard didCenter == false else { return }
-                didCenter = true
-                self?.moveCamera(to: coordinate, zoom: 12)
-            }
-            
-            // Fallback через 2 секунды
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                guard let self = self else { return }
-                if didCenter == false {
-                    print("⚠️ Не удалось получить локацию — fallback на Алматы")
-                    self.moveCamera(to: self.lastCameraCenter, zoom: self.lastZoom)
-                }
-                observer.cancel()
-            }
-        }
-    }
-    
-    @objc private func centerMapOnUserLocation() {
-        if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-        } else {
-            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                guard let coordinate = locations.last?.coordinate else { return }
-                self?.moveCamera(to: coordinate, zoom: 12)
-            }
-        }
-    }
-    
+}
+
+// Helpers
+extension ViewController {
     private func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
         mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
-        
-        // Обновим lastCameraCenter и zoom
+
         self.lastCameraCenter = coordinate
         self.lastZoom = zoom
-        
-        printVisibleRegionInfo(mapView: self.mapView)
+
+        fetchAQIDataAndDisplay()
     }
     
+    private func fetchAQIDataAndDisplay() {
+        aqiService.fetchAQIData(mapView: mapView) { [weak self] markers in
+            guard let self = self, let markers = markers else { return }
+
+            DispatchQueue.main.async {
+                self.addAQIMarkers(markers)
+            }
+        }
+    }
+    
+    private func addAQIMarkers(_ markers: [AQIMarker]) {
+        annotationManager?.annotations.removeAll()
+
+        if annotationManager == nil {
+            annotationManager = mapView.annotations.makePointAnnotationManager()
+        }
+
+        var annotations: [PointAnnotation] = []
+
+        for marker in markers {
+            var annotation = PointAnnotation(coordinate: CLLocationCoordinate2D(
+                latitude: marker.coordinates.latitude,
+                longitude: marker.coordinates.longitude
+            ))
+
+            annotation.image = .init(image: makeCircleImage(color: color(for: marker.aqi)), name: UUID().uuidString)
+            annotation.textField = "\(marker.aqi)"
+            annotation.textSize = 12
+            annotation.textAnchor = .top
+
+            annotations.append(annotation)
+        }
+
+        annotationManager?.annotations = annotations
+    }
+    
+    private func color(for aqi: Int) -> UIColor {
+        switch aqi {
+        case 0...50: return .systemGreen
+        case 51...100: return .systemYellow
+        case 101...150: return .systemOrange
+        case 151...200: return .systemRed
+        case 201...300: return .purple
+        default: return .brown
+        }
+    }
+
+    private func makeCircleImage(color: UIColor, diameter: CGFloat = 30) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: diameter, height: diameter))
+        return renderer.image { ctx in
+            let rect = CGRect(x: 0, y: 0, width: diameter, height: diameter)
+            ctx.cgContext.setFillColor(color.cgColor)
+            ctx.cgContext.fillEllipse(in: rect)
+        }
+    }
 }

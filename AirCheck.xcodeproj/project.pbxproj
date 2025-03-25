@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 6333342F2D89F6EA0082D0CB /* MapboxMaps */; };
+		636E1B122D9285C80051AC01 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 636E1B112D9285C80051AC01 /* Alamofire */; };
 		63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA9EFD2D89EB08007B5340 /* SnapKit */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				636E1B122D9285C80051AC01 /* Alamofire in Frameworks */,
 				633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */,
 				63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */,
 			);
@@ -87,6 +89,7 @@
 			packageProductDependencies = (
 				63CA9EFD2D89EB08007B5340 /* SnapKit */,
 				6333342F2D89F6EA0082D0CB /* MapboxMaps */,
+				636E1B112D9285C80051AC01 /* Alamofire */,
 			);
 			productName = AirCheck;
 			productReference = 63CA9EC32D89E605007B5340 /* AirCheck.app */;
@@ -119,6 +122,7 @@
 			packageReferences = (
 				63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
+				636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63CA9EC42D89E605007B5340 /* Products */;
@@ -358,6 +362,14 @@
 				version = 11.10.1;
 			};
 		};
+		636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = exactVersion;
+				version = 5.10.2;
+			};
+		};
 		63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -373,6 +385,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
 			productName = MapboxMaps;
+		};
+		636E1B112D9285C80051AC01 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		63CA9EFD2D89EB08007B5340 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
