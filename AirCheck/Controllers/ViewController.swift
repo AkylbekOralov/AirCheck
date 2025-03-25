@@ -20,8 +20,13 @@ class ViewController: UIViewController {
     private var annotationManager: PointAnnotationManager?
     let aqiService = AQIService()
     
+//    let secondViewController = SecondViewController()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+//        self.addChild(secondViewController) // TODO: read about it
+//        secondViewController.didMove(toParent: self)
         
         setupMapView()
         setupTrackingButton()
@@ -32,8 +37,8 @@ class ViewController: UIViewController {
 }
 
 // MapView Setup
-extension ViewController {
-    private func setupMapView() {
+private extension ViewController {
+    func setupMapView() {
         let fallbackCamera = CameraOptions(center: lastCameraCenter, zoom: lastZoom)
         let initOptions = MapInitOptions(cameraOptions: fallbackCamera, styleURI: .standard)
         
@@ -47,7 +52,7 @@ extension ViewController {
         try? mapView.mapboxMap.setCameraBounds(with: bounds)
     }
     
-    private func setupCameraListener() {
+    func setupCameraListener() {
         mapView.mapboxMap.onEvery(event: .mapIdle) { [weak self] _ in
             guard let self = self else { return }
 
@@ -81,6 +86,7 @@ extension ViewController {
             moveCamera(to: location.coordinate, zoom: 12)
         } else {
             // Ждём первое обновление в течение 2 секунд, иначе fallback
+            // TODO: make it to wait for 2 sec
             var didCenter = false
             let observer = mapView.location.onLocationChange.observeNext { [weak self] locations in
                 guard let coordinate = locations.last?.coordinate else { return }
@@ -90,12 +96,12 @@ extension ViewController {
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                observer.cancel()
                 guard let self = self else { return }
                 if didCenter == false {
                     print("⚠️ Не удалось получить локацию — fallback на Алматы")
                     self.moveCamera(to: self.lastCameraCenter, zoom: self.lastZoom)
                 }
-                observer.cancel()
             }
         }
     }
