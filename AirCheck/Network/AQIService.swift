@@ -71,6 +71,7 @@ class AQIService {
             return nil
         }
 
+        // Extra 5km padding to the bounds
         let latitudeDelta = 5.0 / 111.0
         let longitudeDelta = 5.0 / 85.0
 

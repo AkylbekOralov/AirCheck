@@ -4,13 +4,6 @@
 <dict>
 	<key>MBXAccessToken</key>
 	<string>pk.eyJ1Ijoib3JhbG92diIsImEiOiJjbTgxc3RvdmYxNGlkMnJzNWE3N3ZueWx0In0.VhEy-n9iWEEDKZ2fT_1ZKg</string>
-	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-	<dict>
-		<key>CustomKey</key>
-		<string>We temporarily require your precise location for an optimal experience.</string>
-		<key>LocationAccuracyAuthorizationDescription</key>
-		<string>Please enable precise location. Your area air quality is available when precise location data is available.</string>
-	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your precise location is used to display air quality around you</string>
 	<key>UIApplicationSceneManifest</key>
