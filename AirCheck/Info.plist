@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>MBXAccessToken</key>
+	<string>pk.eyJ1Ijoib3JhbG92diIsImEiOiJjbTgxc3RvdmYxNGlkMnJzNWE3N3ZueWx0In0.VhEy-n9iWEEDKZ2fT_1ZKg</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your precise location is used to display air quality around you</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
