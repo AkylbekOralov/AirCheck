@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import MapboxMaps
+import MapboxSearch
+import MapboxSearchUI
 
 class MapViewController: UIViewController {
     

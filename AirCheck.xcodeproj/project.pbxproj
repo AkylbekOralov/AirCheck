@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 6333342F2D89F6EA0082D0CB /* MapboxMaps */; };
 		636E1B122D9285C80051AC01 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 636E1B112D9285C80051AC01 /* Alamofire */; };
+		63A17E8B2D95891B00257016 /* MapboxSearch in Frameworks */ = {isa = PBXBuildFile; productRef = 63A17E8A2D95891B00257016 /* MapboxSearch */; };
+		63A17E8D2D95891B00257016 /* MapboxSearchUI in Frameworks */ = {isa = PBXBuildFile; productRef = 63A17E8C2D95891B00257016 /* MapboxSearchUI */; };
 		63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA9EFD2D89EB08007B5340 /* SnapKit */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +45,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				636E1B122D9285C80051AC01 /* Alamofire in Frameworks */,
+				63A17E8D2D95891B00257016 /* MapboxSearchUI in Frameworks */,
+				63A17E8B2D95891B00257016 /* MapboxSearch in Frameworks */,
 				633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */,
 				63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */,
 			);
@@ -90,6 +94,8 @@
 				63CA9EFD2D89EB08007B5340 /* SnapKit */,
 				6333342F2D89F6EA0082D0CB /* MapboxMaps */,
 				636E1B112D9285C80051AC01 /* Alamofire */,
+				63A17E8A2D95891B00257016 /* MapboxSearch */,
+				63A17E8C2D95891B00257016 /* MapboxSearchUI */,
 			);
 			productName = AirCheck;
 			productReference = 63CA9EC32D89E605007B5340 /* AirCheck.app */;
@@ -123,6 +129,7 @@
 				63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				6333342E2D89F6EA0082D0CB /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 				636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				63A17E892D95891B00257016 /* XCRemoteSwiftPackageReference "search-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63CA9EC42D89E605007B5340 /* Products */;
@@ -370,6 +377,14 @@
 				version = 5.10.2;
 			};
 		};
+		63A17E892D95891B00257016 /* XCRemoteSwiftPackageReference "search-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mapbox/search-ios.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.8.0;
+			};
+		};
 		63CA9EFC2D89EB08007B5340 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -390,6 +405,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		63A17E8A2D95891B00257016 /* MapboxSearch */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63A17E892D95891B00257016 /* XCRemoteSwiftPackageReference "search-ios" */;
+			productName = MapboxSearch;
+		};
+		63A17E8C2D95891B00257016 /* MapboxSearchUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63A17E892D95891B00257016 /* XCRemoteSwiftPackageReference "search-ios" */;
+			productName = MapboxSearchUI;
 		};
 		63CA9EFD2D89EB08007B5340 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
