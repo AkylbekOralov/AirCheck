@@ -9,7 +9,6 @@ import MapboxMaps
 import UIKit
 
 final class MapManager {
-    
     private var mapView: MapView
     private var aqiAnnotationManager: PointAnnotationManager?
     private let aqiService = AQIService()

@@ -7,9 +7,6 @@
 
 import UIKit
 import SnapKit
-import MapboxMaps
-import MapboxSearch
-import MapboxSearchUI
 
 class MapViewController: UIViewController {
     private var mapManager: MapManager!
@@ -20,6 +17,8 @@ class MapViewController: UIViewController {
         super.viewDidLoad()
         mapManager = MapManager(container: view)
         setupTrackingButton()
+        
+        
     }
 }
 
