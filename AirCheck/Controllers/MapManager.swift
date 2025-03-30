@@ -89,7 +89,7 @@ final class MapManager {
         }
     }
     
-    @objc func centerMapOnUserLocation() {
+    func centerMapOnUserLocation() {
         if let location = mapView.location.latestLocation {
             moveCamera(to: location.coordinate, zoom: 12)
         } else {

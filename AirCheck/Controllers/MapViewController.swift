@@ -15,7 +15,7 @@ class MapViewController: UIViewController {
     private var mapManager: MapManager!
     // Location button
     private lazy var trackingButton = UIButton(frame: .zero)
-   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         mapManager = MapManager(container: view)
@@ -35,7 +35,7 @@ private extension MapViewController {
         trackingButton.layer.shadowOffset = CGSize(width: 0, height: 2)
         trackingButton.layer.shadowRadius = 2
         
-        trackingButton.addTarget(self, action: #selector(mapManager.centerMapOnUserLocation), for: .touchUpInside)
+        trackingButton.addTarget(self, action: #selector(centerMapOnUserLocation), for: .touchUpInside)
         
         view.addSubview(trackingButton)
         
@@ -44,5 +44,9 @@ private extension MapViewController {
             make.top.equalTo(view.safeAreaLayoutGuide).inset(48)
             make.width.height.equalTo(44)
         }
+    }
+    
+    @objc func centerMapOnUserLocation() {
+        mapManager.centerMapOnUserLocation()
     }
 }
