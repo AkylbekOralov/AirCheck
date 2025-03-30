@@ -9,7 +9,7 @@ import MapboxMaps
 import UIKit
 
 final class MapManager {
-    private var mapView: MapView
+    var mapView: MapView
     private var aqiAnnotationManager: PointAnnotationManager?
     private let aqiService = AQIService()
     
@@ -63,7 +63,7 @@ final class MapManager {
         }
     }
     
-    func centerMapOnUserLocationOrFallback() {
+    private func centerMapOnUserLocationOrFallback() {
         if let location = mapView.location.latestLocation {
             moveCamera(to: location.coordinate, zoom: 12)
         } else {
@@ -109,7 +109,7 @@ final class MapManager {
         updateAQIData()
     }
     
-    func updateAQIData() {
+    private func updateAQIData() {
         aqiService.fetchAQIData(mapView: mapView) { [weak self] markers in
             guard let self, let markers else { return }
             DispatchQueue.main.async {

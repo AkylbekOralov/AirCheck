@@ -10,6 +10,8 @@ import SnapKit
 
 class MapViewController: UIViewController {
     private var mapManager: MapManager!
+    private var searchManager: MapSearchManager!
+    
     // Location button
     private lazy var trackingButton = UIButton(frame: .zero)
     
@@ -18,7 +20,8 @@ class MapViewController: UIViewController {
         mapManager = MapManager(container: view)
         setupTrackingButton()
         
-        
+        searchManager = MapSearchManager(mapView: mapManager.mapView, presentingViewController: self)
+        searchManager.presentSearchUI()
     }
 }
 
