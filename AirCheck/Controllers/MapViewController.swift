@@ -7,25 +7,57 @@
 
 import UIKit
 import SnapKit
+import MapboxMaps
 
 class MapViewController: UIViewController {
+    var mapView: MapView!
     private var mapManager: MapManager!
-    private var searchManager: MapSearchManager!
-    
-    // Location button
     private lazy var trackingButton = UIButton(frame: .zero)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        mapManager = MapManager(container: view)
-        setupTrackingButton()
+        let cameraCenter = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
+        let zoom = CGFloat(8)
         
-        searchManager = MapSearchManager(mapView: mapManager.mapView, presentingViewController: self)
-        searchManager.presentSearchUI()
+        setupMapView(cameraCenter: cameraCenter, zoom: zoom)
+        mapManager = MapManager(mapView: mapView, cameraCenter: cameraCenter, zoom: CGFloat(zoom))
+        centerMapOnUserLocation()
+        setupTrackingButton()
     }
 }
 
 private extension MapViewController {
+    func setupMapView(cameraCenter: CLLocationCoordinate2D, zoom: CGFloat) {
+        let startCameraCenter = CameraOptions(center: cameraCenter, zoom: zoom)
+        let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
+        
+        self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
+        self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.mapView.location.options.puckType = .puck2D()
+        
+        view.addSubview(mapView)
+        
+        // Camera Bounds
+        let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 3.0)
+        try? self.mapView.mapboxMap.setCameraBounds(with: bounds)
+    }
+    
+    @objc func centerMapOnUserLocation() {
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
+        } else {
+            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                self?.moveCamera(to: coordinate, zoom: 12)
+            }
+        }
+    }
+    
+    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+        self.mapManager.updateMapCenter(cameraCenter: coordinate, zoom: zoom)
+        self.mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
+    }
+    
     // MARK: Location Button
     func setupTrackingButton() {
         trackingButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
@@ -46,9 +78,5 @@ private extension MapViewController {
             make.top.equalTo(view.safeAreaLayoutGuide).inset(48)
             make.width.height.equalTo(44)
         }
-    }
-    
-    @objc func centerMapOnUserLocation() {
-        mapManager.centerMapOnUserLocation()
     }
 }

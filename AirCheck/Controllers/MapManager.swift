@@ -9,39 +9,29 @@ import MapboxMaps
 import UIKit
 
 final class MapManager {
-    var mapView: MapView
-    private var aqiAnnotationManager: PointAnnotationManager?
+    let mapView: MapView
+    private(set) var aqiAnnotationManager: PointAnnotationManager?
     private let aqiService = AQIService()
     
     var lastCameraCenter: CLLocationCoordinate2D
     var lastZoom: CGFloat
     
-    init(container: UIView) {
-        self.lastCameraCenter = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
-        self.lastZoom = 8
-
-        let startCameraCenter = CameraOptions(center: lastCameraCenter, zoom: lastZoom)
-        let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
+    init(mapView: MapView, cameraCenter: CLLocationCoordinate2D, zoom: Double) {
+        self.mapView = mapView
+        self.lastCameraCenter = cameraCenter
+        self.lastZoom = zoom
         
-        self.mapView = MapView(frame: container.bounds, mapInitOptions: initOptions)
-        self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        self.mapView.location.options.puckType = .puck2D()
-        
-        container.addSubview(mapView)
-        
-        setupCameraBounds()
         setupCameraListener()
-        centerMapOnUserLocation()
-        
     }
     
-    private func setupCameraBounds() {
-        let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 3.0)
-        try? mapView.mapboxMap.setCameraBounds(with: bounds)
+    func updateMapCenter(cameraCenter: CLLocationCoordinate2D, zoom: CGFloat) {
+        self.lastCameraCenter = cameraCenter
+        self.lastZoom = zoom
     }
     
     private func setupCameraListener() {
         mapView.mapboxMap.onEvery(event: .mapIdle) { [weak self] _ in
+            
             guard let self = self else { return }
             
             let cameraState = mapView.mapboxMap.cameraState
@@ -56,57 +46,10 @@ final class MapManager {
                 return
             }
             
-            lastCameraCenter = center
-            lastZoom = zoom
+            updateMapCenter(cameraCenter: center, zoom: zoom)
             
             updateAQIData()
         }
-    }
-    
-    private func centerMapOnUserLocationOrFallback() {
-        if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-        } else {
-            // Ждём первое обновление в течение 2 секунд, иначе fallback
-            // TODO: make it to wait for 2 sec
-            var didCenter = false
-            let observer = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                guard let coordinate = locations.last?.coordinate else { return }
-                guard didCenter == false else { return }
-                didCenter = true
-                self?.moveCamera(to: coordinate, zoom: 12)
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                observer.cancel()
-                guard let self = self else { return }
-                if didCenter == false {
-                    print("⚠️ Не удалось получить локацию — fallback на Алматы")
-                    self.moveCamera(to: self.lastCameraCenter, zoom: self.lastZoom)
-                }
-            }
-        }
-    }
-    
-    func centerMapOnUserLocation() {
-        if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-        } else {
-            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                guard let coordinate = locations.last?.coordinate else { return }
-                self?.moveCamera(to: coordinate, zoom: 12)
-            }
-        }
-    }
-    
-    // TODO: why "to coordinate"
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
-        mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
-        
-        self.lastCameraCenter = coordinate
-        self.lastZoom = zoom
-        
-        updateAQIData()
     }
     
     private func updateAQIData() {
