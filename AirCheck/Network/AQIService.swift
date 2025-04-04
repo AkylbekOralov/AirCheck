@@ -40,6 +40,8 @@ class AQIService {
                     completion(nil)
                 }
             }
+        
+        printVisibleRegionInfo(mapView: mapView)
     }
     
     func printVisibleRegionInfo(mapView: MapView) {

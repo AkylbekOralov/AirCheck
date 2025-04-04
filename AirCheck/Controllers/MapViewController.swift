@@ -14,21 +14,22 @@ class MapViewController: UIViewController {
     private var mapManager: MapManager!
     private lazy var trackingButton = UIButton(frame: .zero)
     
+    let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
+    let initialZoom = CGFloat(10)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let cameraCenter = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
-        let zoom = CGFloat(8)
         
-        setupMapView(cameraCenter: cameraCenter, zoom: zoom)
-        mapManager = MapManager(mapView: mapView, cameraCenter: cameraCenter, zoom: CGFloat(zoom))
+        setupMapView()
+        mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         centerMapOnUserLocation()
         setupTrackingButton()
     }
 }
 
 private extension MapViewController {
-    func setupMapView(cameraCenter: CLLocationCoordinate2D, zoom: CGFloat) {
-        let startCameraCenter = CameraOptions(center: cameraCenter, zoom: zoom)
+    func setupMapView() {
+        let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
         let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
         
         self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
@@ -54,7 +55,7 @@ private extension MapViewController {
     }
     
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
-        self.mapManager.updateMapCenter(cameraCenter: coordinate, zoom: zoom)
+        self.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
         self.mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
     }
     
@@ -75,7 +76,7 @@ private extension MapViewController {
         
         trackingButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(48)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(48)
             make.width.height.equalTo(44)
         }
     }

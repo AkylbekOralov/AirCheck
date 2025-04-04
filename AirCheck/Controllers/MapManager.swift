@@ -9,24 +9,29 @@ import MapboxMaps
 import UIKit
 
 final class MapManager {
-    let mapView: MapView
+    let mapView: MapView!
     private(set) var aqiAnnotationManager: PointAnnotationManager?
-    private let aqiService = AQIService()
+    private let aqiService: AQIService
     
     var lastCameraCenter: CLLocationCoordinate2D
     var lastZoom: CGFloat
     
-    init(mapView: MapView, cameraCenter: CLLocationCoordinate2D, zoom: Double) {
+    init(mapView: MapView, lastCameraCenter: CLLocationCoordinate2D, lastZoom: CGFloat) {
         self.mapView = mapView
-        self.lastCameraCenter = cameraCenter
-        self.lastZoom = zoom
+        self.lastCameraCenter = lastCameraCenter
+        self.lastZoom = lastZoom
         
+        self.aqiService = AQIService()
+        
+        updateAQIData()
         setupCameraListener()
     }
     
-    func updateMapCenter(cameraCenter: CLLocationCoordinate2D, zoom: CGFloat) {
-        self.lastCameraCenter = cameraCenter
+    func updateMapCameraCenter(coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+        self.lastCameraCenter = coordinate
         self.lastZoom = zoom
+        
+        updateAQIData()
     }
     
     private func setupCameraListener() {
@@ -46,9 +51,7 @@ final class MapManager {
                 return
             }
             
-            updateMapCenter(cameraCenter: center, zoom: zoom)
-            
-            updateAQIData()
+            updateMapCameraCenter(coordinate: center, zoom: zoom)
         }
     }
     
