@@ -10,7 +10,6 @@ import UIKit
 
 final class MapManager {
     let mapView: MapView!
-    private(set) var aqiAnnotationManager: PointAnnotationManager?
     private let aqiService: AQIService
     
     var lastCameraCenter: CLLocationCoordinate2D
@@ -65,29 +64,18 @@ final class MapManager {
     }
     
     private func addAQIMarkers(_ markers: [AQIMarker]) {
-        if aqiAnnotationManager == nil {
-            aqiAnnotationManager = mapView.annotations.makePointAnnotationManager()
-        } else {
-            aqiAnnotationManager?.annotations.removeAll()
-        }
-        
-        let annotations = markers.map { marker -> PointAnnotation in
-            var annotation = PointAnnotation(
+        let annotations = markers.map { marker -> ViewAnnotation in
+            var viewAnnotation = ViewAnnotation(
                 coordinate: CLLocationCoordinate2D(
                     latitude: marker.coordinates.latitude,
                     longitude: marker.coordinates.longitude
-                )
+                ),
+                view: MarkerView(number: marker.aqi)
             )
-            annotation.image = .init(
-                image: UIImage.circleImage(color: AQIColorHelper.color(for: marker.aqi)),
-                name: UUID().uuidString
-            )
-            annotation.textField = "\(marker.aqi)"
-            annotation.textSize = 12
-            annotation.textAnchor = .top
-            return annotation
+            
+            mapView.viewAnnotations.add(viewAnnotation)
+            return viewAnnotation
         }
         
-        aqiAnnotationManager?.annotations = annotations
     }
 }
