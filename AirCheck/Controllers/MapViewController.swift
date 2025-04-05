@@ -14,6 +14,7 @@ class MapViewController: UIViewController {
     private var mapManager: MapManager!
     
     private lazy var trackingButton = UIButton(frame: .zero)
+    let searchBar = SearchBarView()
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     let initialZoom = CGFloat(10)
@@ -26,6 +27,12 @@ class MapViewController: UIViewController {
         centerMapOnUserLocation()
         
         setupTrackingButton()
+        view.addSubview(searchBar)
+        searchBar.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(-20)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(50)
+        }
     }
 }
 
@@ -46,17 +53,17 @@ private extension MapViewController {
     }
     
     @objc func centerMapOnUserLocation() {
-            if let location = mapView.location.latestLocation {
-                moveCamera(to: location.coordinate, zoom: 12)
-                self.mapManager.updateMapCameraCenter(coordinate: location.coordinate, zoom: 12)
-            } else {
-                _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                    guard let coordinate = locations.last?.coordinate else { return }
-                    self?.moveCamera(to: coordinate, zoom: 12)
-                    self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: 12)
-                }
+        if let location = mapView.location.latestLocation {
+            moveCamera(to: location.coordinate, zoom: 12)
+            self.mapManager.updateMapCameraCenter(coordinate: location.coordinate, zoom: 12)
+        } else {
+            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                guard let coordinate = locations.last?.coordinate else { return }
+                self?.moveCamera(to: coordinate, zoom: 12)
+                self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: 12)
             }
         }
+    }
     
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
         mapView.camera.ease(
