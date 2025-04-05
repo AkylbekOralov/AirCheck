@@ -46,19 +46,25 @@ private extension MapViewController {
     }
     
     @objc func centerMapOnUserLocation() {
-        if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-        } else {
-            _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
-                guard let coordinate = locations.last?.coordinate else { return }
-                self?.moveCamera(to: coordinate, zoom: 12)
+            if let location = mapView.location.latestLocation {
+                moveCamera(to: location.coordinate, zoom: 12)
+                self.mapManager.updateMapCameraCenter(coordinate: location.coordinate, zoom: 12)
+            } else {
+                _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
+                    guard let coordinate = locations.last?.coordinate else { return }
+                    self?.moveCamera(to: coordinate, zoom: 12)
+                    self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: 12)
+                }
             }
         }
-    }
     
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
-        self.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
-        self.mapView.camera.ease(to: CameraOptions(center: coordinate, zoom: zoom), duration: 1.2)
+        mapView.camera.ease(
+            to: CameraOptions(center: coordinate, zoom: zoom),
+            duration: 1.2
+        ) { [weak self] _ in
+            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
+        }
     }
     
     // MARK: Location Button

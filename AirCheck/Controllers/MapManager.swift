@@ -19,7 +19,6 @@ final class MapManager {
         self.mapView = mapView
         self.lastCameraCenter = lastCameraCenter
         self.lastZoom = lastZoom
-        
         self.aqiService = AQIService()
         
         updateAQIData()
@@ -29,13 +28,11 @@ final class MapManager {
     func updateMapCameraCenter(coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
         self.lastCameraCenter = coordinate
         self.lastZoom = zoom
-        
         updateAQIData()
     }
     
     private func setupCameraListener() {
         mapView.mapboxMap.onEvery(event: .mapIdle) { [weak self] _ in
-            
             guard let self = self else { return }
             
             let cameraState = mapView.mapboxMap.cameraState
@@ -46,6 +43,7 @@ final class MapManager {
             let lonDiff = abs(center.longitude - lastCameraCenter.longitude)
             let zoomDiff = abs(zoom - lastZoom)
             
+            // 3.3 km and 2.4 km change
             if latDiff < 0.03 && lonDiff < 0.03 && zoomDiff < 0.4 {
                 return
             }
@@ -64,18 +62,17 @@ final class MapManager {
     }
     
     private func addAQIMarkers(_ markers: [AQIMarker]) {
-        let annotations = markers.map { marker -> ViewAnnotation in
-            var viewAnnotation = ViewAnnotation(
+        mapView.viewAnnotations.removeAll()
+        
+        for marker in markers {
+            let annotation = ViewAnnotation(
                 coordinate: CLLocationCoordinate2D(
                     latitude: marker.coordinates.latitude,
                     longitude: marker.coordinates.longitude
                 ),
                 view: MarkerView(number: marker.aqi)
             )
-            
-            mapView.viewAnnotations.add(viewAnnotation)
-            return viewAnnotation
+            mapView.viewAnnotations.add(annotation)
         }
-        
     }
 }

@@ -40,7 +40,6 @@ class AQIService {
                     completion(nil)
                 }
             }
-        
         printVisibleRegionInfo(mapView: mapView)
     }
     
