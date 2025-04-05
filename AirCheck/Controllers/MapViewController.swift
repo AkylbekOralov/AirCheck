@@ -12,6 +12,7 @@ import MapboxMaps
 class MapViewController: UIViewController {
     var mapView: MapView!
     private var mapManager: MapManager!
+    
     private lazy var trackingButton = UIButton(frame: .zero)
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
@@ -23,6 +24,7 @@ class MapViewController: UIViewController {
         setupMapView()
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         centerMapOnUserLocation()
+        
         setupTrackingButton()
     }
 }
