@@ -15,6 +15,7 @@ class MapViewController: UIViewController {
     
     private lazy var trackingButton = UIButton(frame: .zero)
     let searchBar = SearchBarView()
+    let aqiPopupView = AQIPopUpView()
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     let initialZoom = CGFloat(10)
@@ -26,13 +27,23 @@ class MapViewController: UIViewController {
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         centerMapOnUserLocation()
         
-        setupTrackingButton()
         view.addSubview(searchBar)
         searchBar.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(-20)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(50)
         }
+        
+        view.addSubview(aqiPopupView)
+        aqiPopupView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-50)
+            make.height.equalTo(100)
+        }
+        
+        setupTrackingButton()
+        
+        
     }
 }
 
@@ -91,7 +102,7 @@ private extension MapViewController {
         
         trackingButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(48)
+            make.bottom.equalTo(aqiPopupView.snp.top).offset(-16)
             make.width.height.equalTo(44)
         }
     }
