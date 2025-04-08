@@ -13,8 +13,19 @@ class MapViewController: UIViewController {
     var mapView: MapView!
     private var mapManager: MapManager!
     
+    let citiesList = ["Almaty", "Astana", "Shymkent", "Karaganda", "Aktobe", "Pavlodar", "Taraz", "Oskemen", "Semey", "Kostanay"]
+    var displayedSearchResults: [String] = []
+    
     private lazy var trackingButton = UIButton(frame: .zero)
-    let searchBar = SearchBarView()
+    let uiSearchBar: UISearchBar = {
+        let uiSearchBar = UISearchBar()
+        uiSearchBar.placeholder = "Search city"
+        uiSearchBar.searchBarStyle = .default
+        uiSearchBar.barStyle = .default
+        return uiSearchBar
+    }()
+    let tableView = UITableView()
+    
     let aqiPopupView = AQIPopUpView()
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
@@ -27,11 +38,23 @@ class MapViewController: UIViewController {
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         centerMapOnUserLocation()
         
-        view.addSubview(searchBar)
-        searchBar.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(-20)
+        uiSearchBar.delegate = self
+        view.addSubview(uiSearchBar)
+        uiSearchBar.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(50)
+            make.height.equalTo(100)
+        }
+        
+        tableView.isHidden = true
+        view.addSubview(tableView)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(uiSearchBar.snp.bottom)
+            make.leading.trailing.equalTo(uiSearchBar)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         
         view.addSubview(aqiPopupView)
@@ -47,7 +70,47 @@ class MapViewController: UIViewController {
     }
 }
 
+extension MapViewController: UISearchBarDelegate {
+    func searchBar(_: UISearchBar, textDidChange: String) {
+        print("text changed: \(textDidChange)")
+    }
+    
+    func searchBarTextDidBeginEditing(_: UISearchBar) {
+        uiSearchBar.setShowsCancelButton(true, animated: true)
+        displayedSearchResults = citiesList
+        tableView.reloadData()
+        tableView.isHidden = false
+        print("begins editing ...")
+    }
+    
+    func searchBarCancelButtonClicked(_: UISearchBar) {
+        uiSearchBar.text = ""
+        uiSearchBar.resignFirstResponder()
+        uiSearchBar.setShowsCancelButton(false, animated: true)
+    }
+    
+    func searchBarTextDidEndEditing(_: UISearchBar) {
+        tableView.isHidden = true
+        displayedSearchResults = []
+        tableView.reloadData()
+        print("stops editing ...")
+    }
+}
+
+extension MapViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return displayedSearchResults.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = displayedSearchResults[indexPath.row]
+        return cell
+    }
+}
+
 private extension MapViewController {
+    
     func setupMapView() {
         let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
         let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
