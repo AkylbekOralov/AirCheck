@@ -12,19 +12,13 @@ import MapboxMaps
 class MapViewController: UIViewController {
     var mapView: MapView!
     private var mapManager: MapManager!
+    private var mapBoxSearchManager = MapBoxSearchManager()
+
+    var displayedSearchResults: [CityModel] = []
     
-    let citiesList = ["Almaty", "Astana", "Shymkent", "Karaganda", "Aktobe", "Pavlodar", "Taraz", "Oskemen", "Semey", "Kostanay"]
-    var displayedSearchResults: [String] = []
-    
-    private lazy var trackingButton = UIButton(frame: .zero)
-    let uiSearchBar: UISearchBar = {
-        let uiSearchBar = UISearchBar()
-        uiSearchBar.placeholder = "Search city"
-        uiSearchBar.searchBarStyle = .default
-        uiSearchBar.barStyle = .default
-        return uiSearchBar
-    }()
-    let tableView = UITableView()
+    private lazy var userLocationButton = UIButton()
+    private var uiSearchBar = UISearchBar()
+    private var tableView = UITableView()
     
     let aqiPopupView = AQIPopUpView()
     
@@ -38,65 +32,46 @@ class MapViewController: UIViewController {
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         centerMapOnUserLocation()
         
-        uiSearchBar.delegate = self
-        view.addSubview(uiSearchBar)
-        uiSearchBar.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(100)
-        }
-        
-        tableView.isHidden = true
-        view.addSubview(tableView)
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.snp.makeConstraints { make in
-            make.top.equalTo(uiSearchBar.snp.bottom)
-            make.leading.trailing.equalTo(uiSearchBar)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-        }
-        
-        view.addSubview(aqiPopupView)
-        aqiPopupView.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(24)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-50)
-            make.height.equalTo(100)
-        }
-        
-        setupTrackingButton()
-        
-        
+        setupSearchBar()
+        setupTableView()
+        setupAQIPopUpView()
+        setupUserLocationButton()
     }
 }
 
+// MARK: UISearchBarDelegate
 extension MapViewController: UISearchBarDelegate {
     func searchBar(_: UISearchBar, textDidChange: String) {
-        print("text changed: \(textDidChange)")
+        print("SEARCHBAR: text changed: \(textDidChange)")
+        
+        mapBoxSearchManager.makeSearchRequest(for: textDidChange) { cityModels in
+            self.displayedSearchResults = cityModels
+            self.tableView.reloadData()
+        }
     }
     
     func searchBarTextDidBeginEditing(_: UISearchBar) {
         uiSearchBar.setShowsCancelButton(true, animated: true)
-        displayedSearchResults = citiesList
+        displayedSearchResults = KazakhstanCities.cities
         tableView.reloadData()
         tableView.isHidden = false
-        print("begins editing ...")
+        print("SEARCHBAR: begins editing ...")
     }
     
     func searchBarCancelButtonClicked(_: UISearchBar) {
         uiSearchBar.text = ""
         uiSearchBar.resignFirstResponder()
         uiSearchBar.setShowsCancelButton(false, animated: true)
+        print("SEARCHBAR: cancel button clicked")
     }
     
     func searchBarTextDidEndEditing(_: UISearchBar) {
         tableView.isHidden = true
-        displayedSearchResults = []
-        tableView.reloadData()
-        print("stops editing ...")
+        print("SEARCHBAR: stops editing ...")
     }
 }
 
+// MARK: UITableViewDelegate
 extension MapViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayedSearchResults.count
@@ -104,13 +79,22 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = displayedSearchResults[indexPath.row]
+        cell.textLabel?.text = displayedSearchResults[indexPath.row].cityName
         return cell
+    }
+    
+    func tableView(_: UITableView, didSelectRowAt: IndexPath) {
+        tableView.isHidden = true
+        uiSearchBar.resignFirstResponder()
+        uiSearchBar.setShowsCancelButton(false, animated: true)
+        uiSearchBar.searchTextField.text = ""
+        
+        moveCamera(to: displayedSearchResults[didSelectRowAt.row].location, zoom: 11)
+        print("TABLEVIEW: row #\(didSelectRowAt.row) selected")
     }
 }
 
 private extension MapViewController {
-    
     func setupMapView() {
         let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
         let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
@@ -140,33 +124,72 @@ private extension MapViewController {
     }
     
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
-        mapView.camera.ease(
+        mapView.camera.fly(
             to: CameraOptions(center: coordinate, zoom: zoom),
-            duration: 1.2
+            duration: 3
         ) { [weak self] _ in
             self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
         }
     }
     
-    // MARK: Location Button
-    func setupTrackingButton() {
-        trackingButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
-        trackingButton.tintColor = .systemBlue
-        trackingButton.backgroundColor = UIColor(white: 0.97, alpha: 1)
-        trackingButton.layer.cornerRadius = 22
-        trackingButton.layer.shadowColor = UIColor.black.cgColor
-        trackingButton.layer.shadowOpacity = 0.3
-        trackingButton.layer.shadowOffset = CGSize(width: 0, height: 2)
-        trackingButton.layer.shadowRadius = 2
+    // MARK: SearchBar Setup
+    func setupSearchBar() {
+        uiSearchBar.placeholder = "Search city"
+        uiSearchBar.searchBarStyle = .default
+        uiSearchBar.barStyle = .default
         
-        trackingButton.addTarget(self, action: #selector(centerMapOnUserLocation), for: .touchUpInside)
+        uiSearchBar.delegate = self
+        view.addSubview(uiSearchBar)
+        uiSearchBar.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(100)
+        }
+    }
+    
+    // MARK: TableView Setup
+    func setupTableView() {
+        tableView.isHidden = true
+        view.addSubview(tableView)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(uiSearchBar.snp.bottom)
+            make.leading.trailing.equalTo(uiSearchBar)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+        }
+    }
+    
+    // MARK: User Location Button Setup
+    func setupUserLocationButton() {
+        userLocationButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
+        userLocationButton.tintColor = .systemBlue
+        userLocationButton.backgroundColor = UIColor(white: 0.97, alpha: 1)
+        userLocationButton.layer.cornerRadius = 22
+        userLocationButton.layer.shadowColor = UIColor.black.cgColor
+        userLocationButton.layer.shadowOpacity = 0.3
+        userLocationButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        userLocationButton.layer.shadowRadius = 2
         
-        view.addSubview(trackingButton)
+        userLocationButton.addTarget(self, action: #selector(centerMapOnUserLocation), for: .touchUpInside)
         
-        trackingButton.snp.makeConstraints { make in
+        view.addSubview(userLocationButton)
+        
+        userLocationButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
             make.bottom.equalTo(aqiPopupView.snp.top).offset(-16)
             make.width.height.equalTo(44)
+        }
+    }
+    
+    // MARK: AQI Pop Up View Setup
+    func setupAQIPopUpView() {
+        view.addSubview(aqiPopupView)
+        aqiPopupView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-50)
+            make.height.equalTo(100)
         }
     }
 }
