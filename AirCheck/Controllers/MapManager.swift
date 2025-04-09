@@ -29,6 +29,8 @@ final class MapManager {
     func updateMapCameraCenter(coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
         self.lastCameraCenter = coordinate
         self.lastZoom = zoom
+        
+        delegate?.hidePopup()
         updateAQIData()
     }
     
@@ -92,13 +94,13 @@ final class MapManager {
         let number = annotationView.aqiNumber
         let coordinate = annotationView.coordinate
         
-        print(number)
         delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom)
-        delegate?.showPopup(text: "AQI: \(number)", at: coordinate)
+        delegate?.showPopup(aqiNumber: number, at: coordinate)
     }
 }
 
 protocol MapManagerDelegate: AnyObject {
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat)
-    func showPopup(text: String, at coordinate: CLLocationCoordinate2D)
+    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D)
+    func hidePopup()
 }

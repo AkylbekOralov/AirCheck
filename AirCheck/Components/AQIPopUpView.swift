@@ -103,4 +103,8 @@ class AQIPopUpView: UIView {
             make.width.height.equalTo(50)
         }
     }
+
+    func update(withAQI aqi: Int) {
+        aqiLabel.text = "\(aqi)"
+    }
 }

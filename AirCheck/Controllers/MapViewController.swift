@@ -13,14 +13,14 @@ class MapViewController: UIViewController {
     var mapView: MapView!
     private var mapManager: MapManager!
     private var mapBoxSearchManager = MapBoxSearchManager()
-
+    
     var displayedSearchResults: [CityModel] = []
     
     private lazy var userLocationButton = UIButton()
     private var uiSearchBar = UISearchBar()
     private var tableView = UITableView()
-    
     let aqiPopupView = AQIPopUpView()
+    private var isPopupVisible = false
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     let initialZoom = CGFloat(10)
@@ -43,18 +43,54 @@ class MapViewController: UIViewController {
 // Delegate to handle taps on annotations
 extension MapViewController: MapManagerDelegate {
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+        let currentCenter = mapView.cameraState.center
+        let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
+        let destinationLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let distance = currentLocation.distance(from: destinationLocation)
+        
+        var duration: TimeInterval = 1.5
+        
+        if distance < 1000 {
+            duration = 0.5
+        } else if(distance < 5000) {
+            duration = 1
+        } else if(distance < 10000) {
+            duration = 1.5
+        } else {
+            duration = 3
+        }
+        
         mapView.camera.fly(
             to: CameraOptions(center: coordinate, zoom: zoom),
-            duration: 3
+            duration: duration
         ) { [weak self] _ in
             self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
         }
     }
-
-    func showPopup(text: String, at coordinate: CLLocationCoordinate2D) {
-        // Optional: You can implement showing AQIPopUpView with some updated content
-        print("Show popup with text: \(text) at coordinate: \(coordinate)")
+    
+    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D) {
+        aqiPopupView.update(withAQI: aqiNumber)
+     
+        aqiPopupView.alpha = 0
+        aqiPopupView.isHidden = false
+        UIView.animate(withDuration: 0.3) {
+            self.aqiPopupView.alpha = 1
+        }
+        
+        isPopupVisible = true
     }
+    
+    func hidePopup() {
+        guard isPopupVisible else { return }
+
+        UIView.animate(withDuration: 0.3, animations: {
+            self.aqiPopupView.alpha = 0
+        }) { _ in
+            self.aqiPopupView.isHidden = true
+            self.isPopupVisible = false
+        }
+    }
+    
 }
 
 // MARK: UISearchBarDelegate
@@ -120,7 +156,7 @@ private extension MapViewController {
         self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
         self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.mapView.location.options.puckType = .puck2D()
-        
+        try! self.mapView.mapboxMap.localizeLabels(into: Locale(identifier: "ru"))
         view.addSubview(mapView)
         
         // Camera Bounds
@@ -195,6 +231,7 @@ private extension MapViewController {
     // MARK: AQI Pop Up View Setup
     func setupAQIPopUpView() {
         view.addSubview(aqiPopupView)
+        aqiPopupView.isHidden = true
         aqiPopupView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(24)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-50)
