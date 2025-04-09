@@ -11,6 +11,7 @@ import UIKit
 final class MapManager {
     let mapView: MapView!
     private let aqiService: AQIService
+    weak var delegate: MapManagerDelegate?
     
     var lastCameraCenter: CLLocationCoordinate2D
     var lastZoom: CGFloat
@@ -65,14 +66,39 @@ final class MapManager {
         mapView.viewAnnotations.removeAll()
         
         for marker in markers {
-            let annotation = ViewAnnotation(
-                coordinate: CLLocationCoordinate2D(
-                    latitude: marker.coordinates.latitude,
-                    longitude: marker.coordinates.longitude
-                ),
-                view: MarkerView(number: marker.aqi)
+            let coordinate = CLLocationCoordinate2D(
+                latitude: marker.coordinates.latitude,
+                longitude: marker.coordinates.longitude
             )
+            
+            let annotationView = MarkerView(number: marker.aqi, coordinate: coordinate)
+            annotationView.isUserInteractionEnabled = true
+            
+            let tap = UITapGestureRecognizer(target: self, action: #selector(handleAnnotationTap(_:)))
+            annotationView.addGestureRecognizer(tap)
+            
+            let annotation = ViewAnnotation(
+                coordinate: coordinate,
+                view: annotationView
+            )
+            
             mapView.viewAnnotations.add(annotation)
         }
     }
+    
+    @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
+        guard let annotationView = gesture.view as? MarkerView else { return }
+        
+        let number = annotationView.aqiNumber
+        let coordinate = annotationView.coordinate
+        
+        print(number)
+        delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom)
+        delegate?.showPopup(text: "AQI: \(number)", at: coordinate)
+    }
+}
+
+protocol MapManagerDelegate: AnyObject {
+    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat)
+    func showPopup(text: String, at coordinate: CLLocationCoordinate2D)
 }

@@ -30,12 +30,30 @@ class MapViewController: UIViewController {
         
         setupMapView()
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
+        mapManager.delegate = self
         centerMapOnUserLocation()
         
         setupSearchBar()
         setupTableView()
         setupAQIPopUpView()
         setupUserLocationButton()
+    }
+}
+
+// Delegate to handle taps on annotations
+extension MapViewController: MapManagerDelegate {
+    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+        mapView.camera.fly(
+            to: CameraOptions(center: coordinate, zoom: zoom),
+            duration: 3
+        ) { [weak self] _ in
+            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
+        }
+    }
+
+    func showPopup(text: String, at coordinate: CLLocationCoordinate2D) {
+        // Optional: You can implement showing AQIPopUpView with some updated content
+        print("Show popup with text: \(text) at coordinate: \(coordinate)")
     }
 }
 
@@ -120,15 +138,6 @@ private extension MapViewController {
                 self?.moveCamera(to: coordinate, zoom: 12)
                 self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: 12)
             }
-        }
-    }
-    
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
-        mapView.camera.fly(
-            to: CameraOptions(center: coordinate, zoom: zoom),
-            duration: 3
-        ) { [weak self] _ in
-            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
         }
     }
     
