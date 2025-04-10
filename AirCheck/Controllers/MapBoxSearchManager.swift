@@ -10,13 +10,12 @@ import Foundation
 
 class MapBoxSearchManager {
     let placeAutocomplete = PlaceAutocomplete(accessToken: "pk.eyJ1Ijoib3JhbG92diIsImEiOiJjbTgxc3RvdmYxNGlkMnJzNWE3N3ZueWx0In0.VhEy-n9iWEEDKZ2fT_1ZKg")
-    let query = "Starbucks"
     
     init() {
         
     }
     
-    func makeSearchRequest(for query: String, completion: @escaping ([CityModel]) -> Void) {
+    func makeSearchRequest(for query: String, completion: @escaping ([LocationModel]) -> Void) {
         placeAutocomplete.suggestions(for: query) { result in
             switch result {
             case .success(let suggestions):
@@ -30,14 +29,14 @@ class MapBoxSearchManager {
         }
     }
     
-    func processSuggestions(suggestions: [PlaceAutocomplete.Suggestion]) -> [CityModel] {
+    func processSuggestions(suggestions: [PlaceAutocomplete.Suggestion]) -> [LocationModel] {
         return suggestions.compactMap { suggestion in
             guard let description = suggestion.description,
                   let coordinate = suggestion.coordinate else {
                 return nil
             }
             
-            return CityModel(cityName: description, location: coordinate)
+            return LocationModel(name: description, coordinate: coordinate)
         }
     }
     

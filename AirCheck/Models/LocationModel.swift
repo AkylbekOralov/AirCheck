@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 
-struct CityModel {
-    let cityName: String
-    let location: CLLocationCoordinate2D
+struct LocationModel {
+    let name: String
+    let coordinate: CLLocationCoordinate2D
 }

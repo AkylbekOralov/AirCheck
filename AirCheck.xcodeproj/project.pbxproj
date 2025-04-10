@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6330433E2DA7B6E40016C61F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6330433D2DA7B6E40016C61F /* WidgetKit.framework */; };
+		633043402DA7B6E40016C61F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6330433F2DA7B6E40016C61F /* SwiftUI.framework */; };
+		633043512DA7B6E50016C61F /* NearbyAirQualityWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		633334302D89F6EA0082D0CB /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 6333342F2D89F6EA0082D0CB /* MapboxMaps */; };
 		636E1B122D9285C80051AC01 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 636E1B112D9285C80051AC01 /* Alamofire */; };
 		63A17E8B2D95891B00257016 /* MapboxSearch in Frameworks */ = {isa = PBXBuildFile; productRef = 63A17E8A2D95891B00257016 /* MapboxSearch */; };
@@ -14,11 +17,45 @@
 		63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA9EFD2D89EB08007B5340 /* SnapKit */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		6330434F2DA7B6E50016C61F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 63CA9EBB2D89E605007B5340 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6330433A2DA7B6E40016C61F;
+			remoteInfo = NearbyAirQualityWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		633043522DA7B6E50016C61F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				633043512DA7B6E50016C61F /* NearbyAirQualityWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NearbyAirQualityWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6330433D2DA7B6E40016C61F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6330433F2DA7B6E40016C61F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		63CA9EC32D89E605007B5340 /* AirCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		633043562DA7B6E50016C61F /* Exceptions for "NearbyAirQualityWidget" folder in "NearbyAirQualityWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6330433A2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension */;
+		};
 		63CA9ED52D89E606007B5340 /* Exceptions for "AirCheck" folder in "AirCheck" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -29,6 +66,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		633043412DA7B6E40016C61F /* NearbyAirQualityWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				633043562DA7B6E50016C61F /* Exceptions for "NearbyAirQualityWidget" folder in "NearbyAirQualityWidgetExtension" target */,
+			);
+			path = NearbyAirQualityWidget;
+			sourceTree = "<group>";
+		};
 		63CA9EC52D89E605007B5340 /* AirCheck */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -40,6 +85,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		633043382DA7B6E40016C61F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				633043402DA7B6E40016C61F /* SwiftUI.framework in Frameworks */,
+				6330433E2DA7B6E40016C61F /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		63CA9EC02D89E605007B5340 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -55,10 +109,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6330433C2DA7B6E40016C61F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6330433D2DA7B6E40016C61F /* WidgetKit.framework */,
+				6330433F2DA7B6E40016C61F /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		63CA9EBA2D89E605007B5340 = {
 			isa = PBXGroup;
 			children = (
 				63CA9EC52D89E605007B5340 /* AirCheck */,
+				633043412DA7B6E40016C61F /* NearbyAirQualityWidget */,
+				6330433C2DA7B6E40016C61F /* Frameworks */,
 				63CA9EC42D89E605007B5340 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				63CA9EC32D89E605007B5340 /* AirCheck.app */,
+				6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +140,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6330433A2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 633043552DA7B6E50016C61F /* Build configuration list for PBXNativeTarget "NearbyAirQualityWidgetExtension" */;
+			buildPhases = (
+				633043372DA7B6E40016C61F /* Sources */,
+				633043382DA7B6E40016C61F /* Frameworks */,
+				633043392DA7B6E40016C61F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				633043412DA7B6E40016C61F /* NearbyAirQualityWidget */,
+			);
+			name = NearbyAirQualityWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = NearbyAirQualityWidgetExtension;
+			productReference = 6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		63CA9EC22D89E605007B5340 /* AirCheck */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 63CA9ED62D89E606007B5340 /* Build configuration list for PBXNativeTarget "AirCheck" */;
@@ -81,10 +169,12 @@
 				63CA9EBF2D89E605007B5340 /* Sources */,
 				63CA9EC02D89E605007B5340 /* Frameworks */,
 				63CA9EC12D89E605007B5340 /* Resources */,
+				633043522DA7B6E50016C61F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				633043502DA7B6E50016C61F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				63CA9EC52D89E605007B5340 /* AirCheck */,
@@ -111,6 +201,9 @@
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					6330433A2DA7B6E40016C61F = {
+						CreatedOnToolsVersion = 16.2;
+					};
 					63CA9EC22D89E605007B5340 = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -137,11 +230,19 @@
 			projectRoot = "";
 			targets = (
 				63CA9EC22D89E605007B5340 /* AirCheck */,
+				6330433A2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		633043392DA7B6E40016C61F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		63CA9EC12D89E605007B5340 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -152,6 +253,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		633043372DA7B6E40016C61F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		63CA9EBF2D89E605007B5340 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -161,7 +269,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		633043502DA7B6E50016C61F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6330433A2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension */;
+			targetProxy = 6330434F2DA7B6E50016C61F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		633043532DA7B6E50016C61F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4KXG88GL5W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NearbyAirQualityWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NearbyAirQualityWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = oralov.AirCheck.NearbyAirQualityWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		633043542DA7B6E50016C61F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4KXG88GL5W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NearbyAirQualityWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NearbyAirQualityWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = oralov.AirCheck.NearbyAirQualityWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		63CA9ED72D89E606007B5340 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -340,6 +510,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		633043552DA7B6E50016C61F /* Build configuration list for PBXNativeTarget "NearbyAirQualityWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				633043532DA7B6E50016C61F /* Debug */,
+				633043542DA7B6E50016C61F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		63CA9EBE2D89E605007B5340 /* Build configuration list for PBXProject "AirCheck" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
