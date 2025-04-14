@@ -31,14 +31,16 @@ class MapBoxSearchManager {
     
     func processSuggestions(suggestions: [PlaceAutocomplete.Suggestion]) -> [LocationModel] {
         return suggestions.compactMap { suggestion in
-            guard let description = suggestion.description,
-                  let coordinate = suggestion.coordinate else {
+            guard let coordinate = suggestion.coordinate else {
                 return nil
             }
             
-            return LocationModel(name: description, coordinate: coordinate)
+            return LocationModel(
+                name: suggestion.name,
+                coordinate: coordinate,
+                description: suggestion.description,
+                distance: suggestion.distance
+            )
         }
     }
-    
-    
 }

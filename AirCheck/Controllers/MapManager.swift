@@ -16,6 +16,11 @@ final class MapManager {
     var lastCameraCenter: CLLocationCoordinate2D
     var lastZoom: CGFloat
     
+    private var selectedAnnotationView: MarkerView?
+    
+    private var aqiUpdateTimer: Timer?
+    private var lastAQIFetchRegion: String?
+    
     init(mapView: MapView, lastCameraCenter: CLLocationCoordinate2D, lastZoom: CGFloat) {
         self.mapView = mapView
         self.lastCameraCenter = lastCameraCenter
@@ -30,8 +35,10 @@ final class MapManager {
         self.lastCameraCenter = coordinate
         self.lastZoom = zoom
         
-        delegate?.hidePopup()
-        updateAQIData()
+        aqiUpdateTimer?.invalidate() // cancel previous timer
+        aqiUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+            self?.updateAQIData()
+        }
     }
     
     private func setupCameraListener() {
@@ -52,10 +59,30 @@ final class MapManager {
             }
             
             updateMapCameraCenter(coordinate: center, zoom: zoom)
+            
+            if let delegate = self.delegate as? MapViewController,
+               let lastCoord = delegate.lastPopupCoordinate {
+                let movedDistance = CLLocation(latitude: center.latitude, longitude: center.longitude)
+                    .distance(from: CLLocation(latitude: lastCoord.latitude, longitude: lastCoord.longitude))
+                if movedDistance > 100 {
+                    delegate.hidePopup()
+                }
+            }
         }
     }
     
     private func updateAQIData() {
+        guard let (bbox, zoomLevel) = aqiService.getExpandedBoundingBox(from: mapView) else {
+            return
+        }
+        
+        if bbox == lastAQIFetchRegion {
+            print("Skipping AQI fetch: bounding box unchanged")
+            return
+        }
+        
+        lastAQIFetchRegion = bbox
+        
         aqiService.fetchAQIData(mapView: mapView) { [weak self] markers in
             guard let self, let markers else { return }
             DispatchQueue.main.async {
@@ -66,6 +93,7 @@ final class MapManager {
     
     private func addAQIMarkers(_ markers: [AQIMarker]) {
         mapView.viewAnnotations.removeAll()
+        self.selectedAnnotationView = nil
         
         for marker in markers {
             let coordinate = CLLocationCoordinate2D(
@@ -90,6 +118,18 @@ final class MapManager {
     
     @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
         guard let annotationView = gesture.view as? MarkerView else { return }
+        
+        if let selectedView = selectedAnnotationView {
+            UIView.animate(withDuration: 0.2) {
+                selectedView.transform = .identity
+            }
+        }
+        
+        UIView.animate(withDuration: 0.2) {
+            annotationView.transform = CGAffineTransform(scaleX: 1.4, y: 1.4)
+        }
+        
+        selectedAnnotationView = annotationView
         
         let number = annotationView.aqiNumber
         let coordinate = annotationView.coordinate

@@ -25,6 +25,8 @@ class MapViewController: UIViewController {
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     let initialZoom = CGFloat(10)
     
+    var lastPopupCoordinate: CLLocationCoordinate2D?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -77,6 +79,7 @@ extension MapViewController: MapManagerDelegate {
     
     func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D) {
         aqiPopupView.update(withAQI: aqiNumber)
+        lastPopupCoordinate = coordinate
      
         aqiPopupView.alpha = 0
         aqiPopupView.isHidden = false
@@ -89,7 +92,8 @@ extension MapViewController: MapManagerDelegate {
     
     func hidePopup() {
         guard isPopupVisible else { return }
-
+        
+        lastPopupCoordinate = nil
         UIView.animate(withDuration: 0.3, animations: {
             self.aqiPopupView.alpha = 0
         }) { _ in
@@ -139,25 +143,12 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        let city = displayedSearchResults[indexPath.row]
-
-        // Content Style
-        var content = cell.defaultContentConfiguration()
-        content.text = city.name
-        content.textProperties.font = .systemFont(ofSize: 16, weight: .medium)
-        content.textProperties.color = .label
-        cell.contentConfiguration = content
-
-        // Background Style
-        cell.backgroundColor = .secondarySystemBackground
-
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 48
-    }
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: LocationCell.identifier, for: indexPath) as? LocationCell else {
+                return UITableViewCell()
+            }
+            cell.configure(with: displayedSearchResults[indexPath.row])
+            return cell
+        }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         cell.separatorInset = .zero
@@ -178,12 +169,15 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 private extension MapViewController {
     func setupMapView() {
         let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
-        let initOptions = MapInitOptions(cameraOptions: startCameraCenter, styleURI: .standard)
+        let initOptions = MapInitOptions(
+            cameraOptions: startCameraCenter,
+            styleURI: StyleURI(rawValue: "mapbox://styles/oralovv/cm9h9putj00pf01s82y7d9zu0")!
+        )
         
         self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
         self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.mapView.location.options.puckType = .puck2D()
-        try! self.mapView.mapboxMap.localizeLabels(into: Locale(identifier: "ru"))
+        try! mapView.mapboxMap.localizeLabels(into: Locale(identifier: "en"))
         view.addSubview(mapView)
         
         // Camera Bounds
@@ -192,6 +186,7 @@ private extension MapViewController {
     }
     
     @objc func centerMapOnUserLocation() {
+        hidePopup()
         if let location = mapView.location.latestLocation {
             moveCamera(to: location.coordinate, zoom: 12)
             self.mapManager.updateMapCameraCenter(coordinate: location.coordinate, zoom: 12)
@@ -206,7 +201,7 @@ private extension MapViewController {
     
     // MARK: SearchBar Setup
     func setupSearchBar() {
-        uiSearchBar.placeholder = "Search city"
+        uiSearchBar.placeholder = "Введите адрес или город"
         uiSearchBar.searchBarStyle = .minimal
         uiSearchBar.delegate = self
 
@@ -236,11 +231,13 @@ private extension MapViewController {
         tableView.separatorStyle = .none
         tableView.showsVerticalScrollIndicator = false
         tableView.backgroundColor = .secondarySystemBackground
-
-        view.addSubview(tableView)
+        
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(LocationCell.self, forCellReuseIdentifier: LocationCell.identifier)
+
+        view.addSubview(tableView)
+        
 
         tableView.snp.makeConstraints { make in
             make.top.equalTo(uiSearchBar.snp.bottom).offset(8)

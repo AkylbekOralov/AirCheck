@@ -63,7 +63,7 @@ class AQIService {
         print("Zoom Level: \(zoomLevel)")
     }
 
-    private func getExpandedBoundingBox(from mapView: MapView) -> (String, Int)? {
+    func getExpandedBoundingBox(from mapView: MapView) -> (String, Int)? {
         let cameraState = mapView.mapboxMap.cameraState
         let zoom = Int(cameraState.zoom)
         let center = cameraState.center

@@ -13,9 +13,7 @@
             case 0...50: return .systemGreen
             case 51...100: return .systemYellow
             case 101...150: return .systemOrange
-            case 151...200: return .systemRed
-            case 201...300: return .purple
-            default: return .brown
+            default: return .systemRed
             }
         }
     }
