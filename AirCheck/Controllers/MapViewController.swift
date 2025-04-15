@@ -39,6 +39,8 @@ class MapViewController: UIViewController {
         setupTableView()
         setupAQIPopUpView()
         setupUserLocationButton()
+        
+        observePanGesture()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -57,7 +59,7 @@ extension MapViewController: MapManagerDelegate {
         let distance = currentLocation.distance(from: destinationLocation) / 1000
         
         var duration: TimeInterval
-
+        
         switch true {
         case distance > 2000:
             duration = 4
@@ -81,14 +83,18 @@ extension MapViewController: MapManagerDelegate {
         }
     }
     
-    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D) {
+    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animation: Bool) {
         aqiPopupView.update(withAQI: aqiNumber)
         lastPopupCoordinate = coordinate
-     
-        aqiPopupView.alpha = 0
-        aqiPopupView.isHidden = false
-        UIView.animate(withDuration: 0.3) {
-            self.aqiPopupView.alpha = 1
+        
+        if animation {
+            self.aqiPopupView.isHidden = false
+            aqiPopupView.transform = CGAffineTransform(translationX: 0, y: 150)
+            aqiPopupView.isHidden = false
+            
+            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
+                self.aqiPopupView.transform = .identity // Slide into place
+            }, completion: nil)
         }
         
         isPopupVisible = true
@@ -96,12 +102,15 @@ extension MapViewController: MapManagerDelegate {
     
     func hidePopup() {
         guard isPopupVisible else { return }
-        
         lastPopupCoordinate = nil
-        UIView.animate(withDuration: 0.3, animations: {
-            self.aqiPopupView.alpha = 0
+        mapManager.selectedAnnotationView?.isSelected = false
+        mapManager.selectedAnnotationView = nil
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseIn], animations: {
+            self.aqiPopupView.transform = CGAffineTransform(translationX: 0, y: 150)
         }) { _ in
             self.aqiPopupView.isHidden = true
+            self.aqiPopupView.transform = .identity
             self.isPopupVisible = false
         }
     }
@@ -145,15 +154,15 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayedSearchResults.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: LocationCell.identifier, for: indexPath) as? LocationCell else {
-                return UITableViewCell()
-            }
-            cell.configure(with: displayedSearchResults[indexPath.row])
-            return cell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: LocationCell.identifier, for: indexPath) as? LocationCell else {
+            return UITableViewCell()
         }
-
+        cell.configure(with: displayedSearchResults[indexPath.row])
+        return cell
+    }
+    
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         cell.separatorInset = .zero
         cell.preservesSuperviewLayoutMargins = false
@@ -170,6 +179,16 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 private extension MapViewController {
+    private func observePanGesture() {
+        mapView.gestures.panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture(_:)))
+    }
+    
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        if gesture.state == .began {
+            hidePopup()
+        }
+    }
+    
     func setupMapView() {
         let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
         let initOptions = MapInitOptions(
@@ -181,7 +200,7 @@ private extension MapViewController {
         self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.mapView.location.options.puckType = .puck2D()
         view.addSubview(mapView)
-
+        
         let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 6.0)
         try? self.mapView.mapboxMap.setCameraBounds(with: bounds)
     }
@@ -203,18 +222,18 @@ private extension MapViewController {
         uiSearchBar.placeholder = "Введите адрес или город"
         uiSearchBar.searchBarStyle = .minimal
         uiSearchBar.delegate = self
-
+        
         if let textField = uiSearchBar.value(forKey: "searchField") as? UITextField {
             textField.backgroundColor = UIColor.systemGray6
             textField.layer.cornerRadius = 10
             textField.clipsToBounds = true
             textField.textColor = .label
         }
-
+        
         uiSearchBar.backgroundImage = UIImage()
         uiSearchBar.barTintColor = .clear
         uiSearchBar.backgroundColor = .clear
-
+        
         view.addSubview(uiSearchBar)
         uiSearchBar.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
@@ -234,7 +253,7 @@ private extension MapViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(LocationCell.self, forCellReuseIdentifier: LocationCell.identifier)
-
+        
         view.addSubview(tableView)
         
         tableView.snp.makeConstraints { make in

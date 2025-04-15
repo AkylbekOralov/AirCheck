@@ -16,7 +16,7 @@ final class MapManager {
     var lastCameraCenter: CLLocationCoordinate2D
     var lastZoom: CGFloat
     
-    private var selectedAnnotationView: MarkerView?
+    var selectedAnnotationView: MarkerView?
     
     private var aqiUpdateTimer: Timer?
     private var lastAQIFetchRegion: String?
@@ -58,15 +58,6 @@ final class MapManager {
             }
             
             updateMapCameraCenter(coordinate: center, zoom: zoom)
-            
-            if let delegate = self.delegate as? MapViewController,
-               let lastCoord = delegate.lastPopupCoordinate {
-                let movedDistance = CLLocation(latitude: center.latitude, longitude: center.longitude)
-                    .distance(from: CLLocation(latitude: lastCoord.latitude, longitude: lastCoord.longitude))
-                if movedDistance > 100 {
-                    delegate.hidePopup()
-                }
-            }
         }
     }
     
@@ -102,23 +93,26 @@ final class MapManager {
             
             let annotationView = MarkerView(number: marker.aqi, coordinate: coordinate)
             annotationView.isUserInteractionEnabled = true
-            
+
             let tap = UITapGestureRecognizer(target: self, action: #selector(handleAnnotationTap(_:)))
             annotationView.addGestureRecognizer(tap)
             
-            let annotation = ViewAnnotation(
-                coordinate: coordinate,
-                view: annotationView
+            let options = ViewAnnotationOptions(
+                geometry: Point(coordinate),
+                allowOverlap: false,
+                anchor: .center
             )
-            mapView.viewAnnotations.add(annotation)
+            try? mapView.viewAnnotations.add(annotationView, options: options)
         }
     }
     
     @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
         guard let annotationView = gesture.view as? MarkerView else { return }
+        var animation = true
         
         if let lastSelectedAnnotation = selectedAnnotationView {
             lastSelectedAnnotation.isSelected = false
+            animation = false
         }
         
         selectedAnnotationView = annotationView
@@ -128,12 +122,12 @@ final class MapManager {
         let coordinate = annotationView.coordinate
         
         delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom, updateAnnotations: false)
-        delegate?.showPopup(aqiNumber: number, at: coordinate)
+        delegate?.showPopup(aqiNumber: number, at: coordinate, animation: animation)
     }
 }
 
 protocol MapManagerDelegate: AnyObject {
     func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool)
-    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D)
+    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animation: Bool)
     func hidePopup()
 }
