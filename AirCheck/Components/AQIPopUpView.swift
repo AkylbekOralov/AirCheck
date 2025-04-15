@@ -106,5 +106,7 @@ class AQIPopUpView: UIView {
 
     func update(withAQI aqi: Int) {
         aqiLabel.text = "\(aqi)"
+        statusLabel.text = AQIHelper.state(for: aqi)
+        faceImageView.image = UIImage(named: AQIHelper.image(for: aqi))
     }
 }

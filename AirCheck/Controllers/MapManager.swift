@@ -31,13 +31,12 @@ final class MapManager {
         setupCameraListener()
     }
     
-    func updateMapCameraCenter(coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+    func updateMapCameraCenter(coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool = true) {
         self.lastCameraCenter = coordinate
         self.lastZoom = zoom
         
-        aqiUpdateTimer?.invalidate() // cancel previous timer
-        aqiUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
-            self?.updateAQIData()
+        if updateAnnotations {
+            self.updateAQIData()
         }
     }
     
@@ -111,7 +110,6 @@ final class MapManager {
                 coordinate: coordinate,
                 view: annotationView
             )
-            
             mapView.viewAnnotations.add(annotation)
         }
     }
@@ -119,28 +117,23 @@ final class MapManager {
     @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
         guard let annotationView = gesture.view as? MarkerView else { return }
         
-        if let selectedView = selectedAnnotationView {
-            UIView.animate(withDuration: 0.2) {
-                selectedView.transform = .identity
-            }
-        }
-        
-        UIView.animate(withDuration: 0.2) {
-            annotationView.transform = CGAffineTransform(scaleX: 1.4, y: 1.4)
+        if let lastSelectedAnnotation = selectedAnnotationView {
+            lastSelectedAnnotation.isSelected = false
         }
         
         selectedAnnotationView = annotationView
+        selectedAnnotationView?.isSelected = true
         
         let number = annotationView.aqiNumber
         let coordinate = annotationView.coordinate
         
-        delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom)
+        delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom, updateAnnotations: false)
         delegate?.showPopup(aqiNumber: number, at: coordinate)
     }
 }
 
 protocol MapManagerDelegate: AnyObject {
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat)
+    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool)
     func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D)
     func hidePopup()
 }

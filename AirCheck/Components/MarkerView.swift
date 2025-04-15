@@ -13,12 +13,23 @@ class MarkerView: UIView {
     private let aqiNumberLabel = UILabel()
     var aqiNumber: Int
     var coordinate: CLLocationCoordinate2D
+    private var sizeConstraint: Constraint?
     
     init(number: Int, diameter: CGFloat = 30, coordinate: CLLocationCoordinate2D) {
         self.aqiNumber = number
         self.coordinate = coordinate
         super.init(frame: .zero)
         setupView(diameter: diameter)
+    }
+    
+    var isSelected: Bool = false {
+        didSet {
+            if isSelected {
+                scaleUpView()
+            } else {
+                returnToOriginalScale()
+            }
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -31,7 +42,7 @@ class MarkerView: UIView {
         }
         
         self.layer.cornerRadius = diameter / 2
-        self.backgroundColor = AQIColorHelper.color(for: aqiNumber)
+        self.backgroundColor = AQIHelper.color(for: aqiNumber)
         self.layer.borderWidth = 2
         self.layer.borderColor = UIColor.white.cgColor
         
@@ -50,6 +61,19 @@ class MarkerView: UIView {
         
         aqiNumberLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
+        }
+    }
+    
+    private func scaleUpView() {
+        UIView.animate(withDuration: 0.2) {
+            self.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+        }
+    }
+
+    private func returnToOriginalScale() {
+        UIView.animate(withDuration: 0.2) {
+            // Reset the view to its original scale
+            self.transform = .identity
         }
     }
 }

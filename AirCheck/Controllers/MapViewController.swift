@@ -19,6 +19,7 @@ class MapViewController: UIViewController {
     private lazy var userLocationButton = UIButton()
     private var uiSearchBar = UISearchBar()
     private var tableView = UITableView()
+    
     let aqiPopupView = AQIPopUpView()
     private var isPopupVisible = false
     
@@ -33,18 +34,22 @@ class MapViewController: UIViewController {
         setupMapView()
         mapManager = MapManager(mapView: mapView, lastCameraCenter: initialCameraCoordinate, lastZoom: initialZoom)
         mapManager.delegate = self
-        centerMapOnUserLocation()
         
         setupSearchBar()
         setupTableView()
         setupAQIPopUpView()
         setupUserLocationButton()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        centerMapOnUserLocation()
+    }
 }
 
 // Delegate to handle taps on annotations
 extension MapViewController: MapManagerDelegate {
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat) {
+    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool) {
         let currentCenter = mapView.cameraState.center
         let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
         let destinationLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -54,26 +59,25 @@ extension MapViewController: MapManagerDelegate {
         var duration: TimeInterval
 
         switch true {
-        case distance > 500:
+        case distance > 2000:
             duration = 4
+        case distance > 500:
+            duration = 3
         case distance > 300:
-            duration = 3.5
-        case distance > 150:
             duration = 2.5
+        case distance > 150:
+            duration = 2
         case distance > 75:
             duration = 1.2
         default:
             duration = 0.6
         }
         
-        print("distance: \(distance)km")
-        print("duration: \(duration)s")
-        
         mapView.camera.fly(
             to: CameraOptions(center: coordinate, zoom: zoom),
             duration: duration
         ) { [weak self] _ in
-            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom)
+            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom, updateAnnotations: updateAnnotations)
         }
     }
     
@@ -107,11 +111,14 @@ extension MapViewController: MapManagerDelegate {
 // MARK: UISearchBarDelegate
 extension MapViewController: UISearchBarDelegate {
     func searchBar(_: UISearchBar, textDidChange: String) {
-        print("SEARCHBAR: text changed: \(textDidChange)")
-        
-        mapBoxSearchManager.makeSearchRequest(for: textDidChange) { cityModels in
-            self.displayedSearchResults = cityModels
-            self.tableView.reloadData()
+        if textDidChange.isEmpty {
+            displayedSearchResults = KazakhstanCities.cities
+            tableView.reloadData()
+        } else {
+            mapBoxSearchManager.makeSearchRequest(for: textDidChange) { cityModels in
+                self.displayedSearchResults = cityModels
+                self.tableView.reloadData()
+            }
         }
     }
     
@@ -120,19 +127,16 @@ extension MapViewController: UISearchBarDelegate {
         displayedSearchResults = KazakhstanCities.cities
         tableView.reloadData()
         tableView.isHidden = false
-        print("SEARCHBAR: begins editing ...")
     }
     
     func searchBarCancelButtonClicked(_: UISearchBar) {
         uiSearchBar.text = ""
         uiSearchBar.resignFirstResponder()
         uiSearchBar.setShowsCancelButton(false, animated: true)
-        print("SEARCHBAR: cancel button clicked")
     }
     
     func searchBarTextDidEndEditing(_: UISearchBar) {
         tableView.isHidden = true
-        print("SEARCHBAR: stops editing ...")
     }
 }
 
@@ -161,8 +165,7 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         uiSearchBar.setShowsCancelButton(false, animated: true)
         uiSearchBar.searchTextField.text = ""
         
-        moveCamera(to: displayedSearchResults[didSelectRowAt.row].coordinate, zoom: 11)
-        print("TABLEVIEW: row #\(didSelectRowAt.row) selected")
+        moveCamera(to: displayedSearchResults[didSelectRowAt.row].coordinate, zoom: 11, updateAnnotations: true)
     }
 }
 
@@ -177,24 +180,20 @@ private extension MapViewController {
         self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
         self.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.mapView.location.options.puckType = .puck2D()
-        try! mapView.mapboxMap.localizeLabels(into: Locale(identifier: "en"))
         view.addSubview(mapView)
-        
-        // Camera Bounds
-        let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 3.0)
+
+        let bounds = CameraBoundsOptions(maxZoom: 14.0, minZoom: 6.0)
         try? self.mapView.mapboxMap.setCameraBounds(with: bounds)
     }
     
     @objc func centerMapOnUserLocation() {
         hidePopup()
         if let location = mapView.location.latestLocation {
-            moveCamera(to: location.coordinate, zoom: 12)
-            self.mapManager.updateMapCameraCenter(coordinate: location.coordinate, zoom: 12)
+            moveCamera(to: location.coordinate, zoom: 12, updateAnnotations: true)
         } else {
             _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
                 guard let coordinate = locations.last?.coordinate else { return }
-                self?.moveCamera(to: coordinate, zoom: 12)
-                self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: 12)
+                self?.moveCamera(to: coordinate, zoom: 12, updateAnnotations: true)
             }
         }
     }
@@ -238,7 +237,6 @@ private extension MapViewController {
 
         view.addSubview(tableView)
         
-
         tableView.snp.makeConstraints { make in
             make.top.equalTo(uiSearchBar.snp.bottom).offset(8)
             make.leading.trailing.equalTo(uiSearchBar)
