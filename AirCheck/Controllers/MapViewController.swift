@@ -132,6 +132,7 @@ extension MapViewController: UISearchBarDelegate {
     }
     
     func searchBarTextDidBeginEditing(_: UISearchBar) {
+        hidePopup()
         uiSearchBar.setShowsCancelButton(true, animated: true)
         displayedSearchResults = KazakhstanCities.cities
         tableView.reloadData()
