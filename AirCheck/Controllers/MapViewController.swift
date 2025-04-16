@@ -37,9 +37,9 @@ class MapViewController: UIViewController {
         mapManager.delegate = self
         
         setupSearchBar()
-        setupTableView()
         setupAQIPopUpView()
         setupUserLocationButton()
+        setupTableView()
         
         observePanGesture()
     }
@@ -208,9 +208,16 @@ private extension MapViewController {
     
     func setupMapView() {
         let startCameraCenter = CameraOptions(center: initialCameraCoordinate, zoom: initialZoom)
+        var styleURI: StyleURI!
+        
+        if traitCollection.userInterfaceStyle == .dark {
+            styleURI = StyleURI(rawValue: "mapbox://styles/oralovv/cm9jo2meh00s801s74yz75cbj")!
+        } else {
+            styleURI = StyleURI(rawValue: "mapbox://styles/oralovv/cm9h9putj00pf01s82y7d9zu0")!
+        }
         let initOptions = MapInitOptions(
             cameraOptions: startCameraCenter,
-            styleURI: StyleURI(rawValue: "mapbox://styles/oralovv/cm9h9putj00pf01s82y7d9zu0")!
+            styleURI: styleURI
         )
         
         self.mapView = MapView(frame: view.bounds, mapInitOptions: initOptions)
@@ -284,7 +291,7 @@ private extension MapViewController {
     func setupUserLocationButton() {
         userLocationButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
         userLocationButton.tintColor = .systemBlue
-        userLocationButton.backgroundColor = UIColor(white: 0.97, alpha: 1)
+        userLocationButton.backgroundColor = .systemBackground
         userLocationButton.layer.cornerRadius = 22
         userLocationButton.layer.shadowColor = UIColor.black.cgColor
         userLocationButton.layer.shadowOpacity = 0.3
