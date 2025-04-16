@@ -12,7 +12,6 @@ import MapboxMaps
 class MapViewController: UIViewController {
     var mapView: MapView!
     private var mapManager: MapManager!
-    private var mapBoxSearchManager = MapBoxSearchManager()
     
     var displayedSearchResults: [LocationModel] = []
     
@@ -190,7 +189,7 @@ private extension MapViewController {
                 let locations: [LocationModel] = addresses.compactMap { $0.toLocationModel() }
                 completion(locations)
             case .failure(let error):
-                print("❌ Search error: \(error.localizedDescription)")
+                print("Search error: \(error.localizedDescription)")
                 completion([])
             }
         }

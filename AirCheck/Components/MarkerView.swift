@@ -45,32 +45,6 @@ class MarkerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //    private func setupView(diameter: CGFloat) {
-    //        contentView.frame = bounds
-    //
-    //        self.layer.cornerRadius = diameter / 2
-    //        self.backgroundColor = AQIHelper.color(for: aqiNumber)
-    //        self.layer.borderWidth = 2
-    //        self.layer.borderColor = UIColor.white.cgColor
-    //
-    //        self.layer.shadowColor = UIColor.black.cgColor
-    //        self.layer.shadowOpacity = 0.25
-    //        self.layer.shadowOffset = CGSize(width: 0, height: 2)
-    //        self.layer.shadowRadius = 4
-    //        self.layer.masksToBounds = false
-    //
-    //        aqiNumberLabel.text = "\(aqiNumber)"
-    //        aqiNumberLabel.textAlignment = .center
-    //        aqiNumberLabel.textColor = .black
-    //        aqiNumberLabel.font = UIFont.boldSystemFont(ofSize: 14)
-    //
-    //        addSubview(aqiNumberLabel)
-    //
-    //        aqiNumberLabel.snp.makeConstraints { make in
-    //            make.center.equalToSuperview()
-    //        }
-    //    }
-    
     private func setupView(diameter: CGFloat) {
         contentView.frame = bounds
         contentView.layer.cornerRadius = diameter / 2

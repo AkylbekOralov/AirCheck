@@ -8,7 +8,6 @@
 import Alamofire
 
 class AddressSearchService {
-    
     static let shared = AddressSearchService()
     private let baseURL = "https://nominatim.openstreetmap.org/search"
     
