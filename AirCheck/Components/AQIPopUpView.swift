@@ -11,7 +11,7 @@ import SnapKit
 class AQIPopUpView: UIView {
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = AQIHelper.backgroundColor(for: 0) // Placeholder, updated in `update()`
+        view.backgroundColor = AQIHelper.backgroundColor(for: 0)
         view.layer.cornerRadius = 20
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.1
@@ -90,14 +90,12 @@ class AQIPopUpView: UIView {
         containerView.addSubview(statusStack)
         containerView.addSubview(faceImageView)
         
-        // AQI Box Stack
         let aqiStack = UIStackView(arrangedSubviews: [aqiLabel, aqiSubLabel])
         aqiStack.axis = .vertical
         aqiStack.alignment = .center
         aqiStack.spacing = 4
         aqiBox.addSubview(aqiStack)
-        
-        // Constraints
+
         aqiBox.snp.makeConstraints { make in
             make.size.equalTo(70)
             make.leading.equalToSuperview().offset(16)
