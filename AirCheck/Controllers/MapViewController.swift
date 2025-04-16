@@ -27,6 +27,7 @@ class MapViewController: UIViewController {
     let initialZoom = CGFloat(10)
     
     var lastPopupCoordinate: CLLocationCoordinate2D?
+    private var searchDebounceTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,20 +115,27 @@ extension MapViewController: MapManagerDelegate {
             self.isPopupVisible = false
         }
     }
-    
 }
 
 // MARK: UISearchBarDelegate
 extension MapViewController: UISearchBarDelegate {
     func searchBar(_: UISearchBar, textDidChange: String) {
+        searchDebounceTimer?.invalidate()
+        
         if textDidChange.isEmpty {
             displayedSearchResults = KazakhstanCities.cities
             tableView.reloadData()
-        } else {
-            mapBoxSearchManager.makeSearchRequest(for: textDidChange) { cityModels in
-                self.displayedSearchResults = cityModels
-                self.tableView.reloadData()
+        } else if textDidChange.count >= 3 {
+            searchDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                self.fetchSearchResults(for: textDidChange) { locations in
+                    self.displayedSearchResults = locations
+                    self.tableView.reloadData()
+                }
             }
+        } else {
+            displayedSearchResults = []
+            tableView.reloadData()
         }
     }
     
@@ -164,11 +172,6 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.separatorInset = .zero
-        cell.preservesSuperviewLayoutMargins = false
-    }
-    
     func tableView(_: UITableView, didSelectRowAt: IndexPath) {
         tableView.isHidden = true
         uiSearchBar.resignFirstResponder()
@@ -180,6 +183,19 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 private extension MapViewController {
+    private func fetchSearchResults(for query: String, completion: @escaping ([LocationModel]) -> Void) {
+        AddressSearchService.shared.search(query: query) { result in
+            switch result {
+            case .success(let addresses):
+                let locations: [LocationModel] = addresses.compactMap { $0.toLocationModel() }
+                completion(locations)
+            case .failure(let error):
+                print("❌ Search error: \(error.localizedDescription)")
+                completion([])
+            }
+        }
+    }
+    
     private func observePanGesture() {
         mapView.gestures.panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture(_:)))
     }
@@ -247,10 +263,10 @@ private extension MapViewController {
     func setupTableView() {
         tableView.isHidden = true
         tableView.layer.cornerRadius = 12
-        tableView.separatorStyle = .none
         tableView.showsVerticalScrollIndicator = false
-        tableView.backgroundColor = .secondarySystemBackground
-        
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 60
+
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(LocationCell.self, forCellReuseIdentifier: LocationCell.identifier)
@@ -260,7 +276,7 @@ private extension MapViewController {
         tableView.snp.makeConstraints { make in
             make.top.equalTo(uiSearchBar.snp.bottom).offset(8)
             make.leading.trailing.equalTo(uiSearchBar)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            make.bottom.equalTo(view.snp.bottom)
         }
     }
     

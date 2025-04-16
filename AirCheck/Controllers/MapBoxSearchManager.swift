@@ -38,8 +38,7 @@ class MapBoxSearchManager {
             return LocationModel(
                 name: suggestion.name,
                 coordinate: coordinate,
-                description: suggestion.description,
-                distance: suggestion.distance
+                description: suggestion.description
             )
         }
     }

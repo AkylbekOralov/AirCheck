@@ -13,7 +13,6 @@ class LocationCell: UITableViewCell {
     
     private let nameLabel = UILabel()
     private let descriptionLabel = UILabel()
-    private let distanceLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -27,17 +26,14 @@ class LocationCell: UITableViewCell {
 
     private func setupViews() {
         nameLabel.font = .boldSystemFont(ofSize: 16)
-        
+    
         descriptionLabel.font = .systemFont(ofSize: 14)
         descriptionLabel.textColor = .darkGray
         descriptionLabel.numberOfLines = 0
-        
-        distanceLabel.font = .systemFont(ofSize: 14)
-        distanceLabel.textColor = .blue
+        descriptionLabel.lineBreakMode = .byWordWrapping
 
         contentView.addSubview(nameLabel)
         contentView.addSubview(descriptionLabel)
-        contentView.addSubview(distanceLabel)
     }
 
     private func setupConstraints() {
@@ -49,12 +45,7 @@ class LocationCell: UITableViewCell {
         descriptionLabel.snp.makeConstraints { make in
             make.top.equalTo(nameLabel.snp.bottom).offset(4)
             make.leading.trailing.equalToSuperview().inset(16)
-        }
-
-        distanceLabel.snp.makeConstraints { make in
-            make.top.equalTo(descriptionLabel.snp.bottom).offset(4)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.bottom.lessThanOrEqualToSuperview().inset(10)
+            make.bottom.equalToSuperview().offset(-10)
         }
     }
 
@@ -67,14 +58,6 @@ class LocationCell: UITableViewCell {
         } else {
             descriptionLabel.isHidden = true
             descriptionLabel.text = nil
-        }
-
-        if let distance = model.distance {
-            distanceLabel.isHidden = false
-            distanceLabel.text = String(format: "Distance: %.2f km", distance)
-        } else {
-            distanceLabel.isHidden = true
-            distanceLabel.text = nil
         }
     }
 }
