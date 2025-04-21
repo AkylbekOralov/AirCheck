@@ -61,6 +61,8 @@ class AQIPopUpView: UIView {
         let label = UILabel()
         label.textColor = .white.withAlphaComponent(0.9)
         label.font = .systemFont(ofSize: 14)
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         return label
     }()
     
@@ -109,16 +111,19 @@ class AQIPopUpView: UIView {
         statusStack.addArrangedSubview(statusLabel)
         statusStack.addArrangedSubview(messageLabel)
         
-        statusStack.snp.makeConstraints { make in
-            make.leading.equalTo(aqiBox.snp.trailing).offset(16)
-            make.centerY.equalToSuperview()
-        }
-        
         faceImageView.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(20)
             make.centerY.equalToSuperview()
             make.width.height.equalTo(40)
         }
+        
+        statusStack.snp.makeConstraints { make in
+            make.leading.equalTo(aqiBox.snp.trailing).offset(16)
+            make.trailing.equalTo(faceImageView.snp.leading).offset(-16)
+            make.centerY.equalToSuperview()
+        }
+        
+        
     }
     
     func update(withAQI aqi: Int) {

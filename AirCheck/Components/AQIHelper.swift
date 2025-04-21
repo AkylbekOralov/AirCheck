@@ -20,7 +20,7 @@
         static func image(for aqi: Int) -> String {
             switch aqi {
             case 0...50: return "Smile"
-            case 51...100: return "Confused"
+            case 51...100: return "Сonfused"
             case 101...150: return "Sad"
             default: return "SuperSad"
             }
@@ -28,10 +28,10 @@
         
         static func state(for aqi: Int) -> String {
             switch aqi {
-            case 0...50: return "Good"
-            case 51...100: return "Moderate"
-            case 101...150: return "Bad"
-            default: return "Terrible"
+            case 0...50: return "Хорошее"
+            case 51...100: return "Умеренное"
+            case 101...150: return "Плохое"
+            default: return "Очень плохое"
             }
         }
         
@@ -78,17 +78,17 @@
         static func message(for aqi: Int) -> String {
             switch aqi {
             case 0...50:
-                return "Air quality is good"
+                return "Качество воздуха хорошее"
             case 51...100:
-                return "Acceptable air quality"
+                return "Допустимое качество воздуха"
             case 101...150:
-                return "Unhealthy for sensitive groups"
+                return "Вредно для чувствительных групп"
             case 151...200:
-                return "Unhealthy for everyone"
+                return "Вредно для всех"
             case 201...300:
-                return "Avoid outdoor activity"
+                return "Избегайте активностей на улице"
             default:
-                return "Hazardous — stay indoors"
+                return "Опасно — оставайтесь дома"
             }
         }
     }
