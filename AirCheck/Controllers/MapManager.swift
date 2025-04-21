@@ -125,9 +125,3 @@ final class MapManager {
         delegate?.showPopup(aqiNumber: number, at: coordinate, animation: animation)
     }
 }
-
-protocol MapManagerDelegate: AnyObject {
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool)
-    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animation: Bool)
-    func hidePopup()
-}

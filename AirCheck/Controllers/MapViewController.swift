@@ -11,22 +11,22 @@ import MapboxMaps
 
 class MapViewController: UIViewController {
     var mapView: MapView!
-    private var mapManager: MapManager!
+    private(set) var mapManager: MapManager!
     
     var displayedSearchResults: [LocationModel] = []
     
     private lazy var userLocationButton = UIButton()
-    private var uiSearchBar = UISearchBar()
-    private var tableView = UITableView()
+    private(set) var uiSearchBar = UISearchBar()
+    private(set) var tableView = UITableView()
     
     let aqiPopupView = AQIPopUpView()
-    private var isPopupVisible = false
+    var isPopupVisible = false
     
     let initialCameraCoordinate = CLLocationCoordinate2D(latitude: 43.2380, longitude: 76.8829)
     let initialZoom = CGFloat(10)
     
     var lastPopupCoordinate: CLLocationCoordinate2D?
-    private var searchDebounceTimer: Timer?
+    var searchDebounceTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,140 +49,8 @@ class MapViewController: UIViewController {
     }
 }
 
-// Delegate to handle taps on annotations
-extension MapViewController: MapManagerDelegate {
-    func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, updateAnnotations: Bool) {
-        let currentCenter = mapView.cameraState.center
-        let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
-        let destinationLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        
-        let distance = currentLocation.distance(from: destinationLocation) / 1000
-        
-        var duration: TimeInterval
-        
-        switch true {
-        case distance > 2000:
-            duration = 4
-        case distance > 500:
-            duration = 3
-        case distance > 300:
-            duration = 2.5
-        case distance > 150:
-            duration = 2
-        case distance > 75:
-            duration = 1.2
-        default:
-            duration = 0.6
-        }
-        
-        mapView.camera.fly(
-            to: CameraOptions(center: coordinate, zoom: zoom),
-            duration: duration
-        ) { [weak self] _ in
-            self?.mapManager.updateMapCameraCenter(coordinate: coordinate, zoom: zoom, updateAnnotations: updateAnnotations)
-        }
-    }
-    
-    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animation: Bool) {
-        aqiPopupView.update(withAQI: aqiNumber)
-        lastPopupCoordinate = coordinate
-        
-        if animation {
-            self.aqiPopupView.isHidden = false
-            aqiPopupView.transform = CGAffineTransform(translationX: 0, y: 150)
-            aqiPopupView.isHidden = false
-            
-            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
-                self.aqiPopupView.transform = .identity // Slide into place
-            }, completion: nil)
-        }
-        
-        isPopupVisible = true
-    }
-    
-    func hidePopup() {
-        guard isPopupVisible else { return }
-        lastPopupCoordinate = nil
-        mapManager.selectedAnnotationView?.isSelected = false
-        mapManager.selectedAnnotationView = nil
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseIn], animations: {
-            self.aqiPopupView.transform = CGAffineTransform(translationX: 0, y: 150)
-        }) { _ in
-            self.aqiPopupView.isHidden = true
-            self.aqiPopupView.transform = .identity
-            self.isPopupVisible = false
-        }
-    }
-}
-
-// MARK: UISearchBarDelegate
-extension MapViewController: UISearchBarDelegate {
-    func searchBar(_: UISearchBar, textDidChange: String) {
-        searchDebounceTimer?.invalidate()
-        
-        if textDidChange.isEmpty {
-            displayedSearchResults = KazakhstanCities.cities
-            tableView.reloadData()
-        } else if textDidChange.count >= 3 {
-            searchDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                self.fetchSearchResults(for: textDidChange) { locations in
-                    self.displayedSearchResults = locations
-                    self.tableView.reloadData()
-                }
-            }
-        } else {
-            displayedSearchResults = []
-            tableView.reloadData()
-        }
-    }
-    
-    func searchBarTextDidBeginEditing(_: UISearchBar) {
-        hidePopup()
-        uiSearchBar.setShowsCancelButton(true, animated: true)
-        displayedSearchResults = KazakhstanCities.cities
-        tableView.reloadData()
-        tableView.isHidden = false
-    }
-    
-    func searchBarCancelButtonClicked(_: UISearchBar) {
-        uiSearchBar.text = ""
-        uiSearchBar.resignFirstResponder()
-        uiSearchBar.setShowsCancelButton(false, animated: true)
-    }
-    
-    func searchBarTextDidEndEditing(_: UISearchBar) {
-        tableView.isHidden = true
-    }
-}
-
-// MARK: UITableViewDelegate
-extension MapViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return displayedSearchResults.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: LocationCell.identifier, for: indexPath) as? LocationCell else {
-            return UITableViewCell()
-        }
-        cell.configure(with: displayedSearchResults[indexPath.row])
-        return cell
-    }
-    
-    func tableView(_: UITableView, didSelectRowAt: IndexPath) {
-        tableView.isHidden = true
-        uiSearchBar.resignFirstResponder()
-        uiSearchBar.setShowsCancelButton(false, animated: true)
-        uiSearchBar.searchTextField.text = ""
-        
-        moveCamera(to: displayedSearchResults[didSelectRowAt.row].coordinate, zoom: 11, updateAnnotations: true)
-    }
-}
-
-private extension MapViewController {
-    private func fetchSearchResults(for query: String, completion: @escaping ([LocationModel]) -> Void) {
+extension MapViewController {
+    func fetchSearchResults(for query: String, completion: @escaping ([LocationModel]) -> Void) {
         AddressSearchService.shared.search(query: query) { result in
             switch result {
             case .success(let addresses):
