@@ -108,11 +108,11 @@ final class MapManager {
     
     @objc func handleAnnotationTap(_ gesture: UITapGestureRecognizer) {
         guard let annotationView = gesture.view as? MarkerView else { return }
-        var animation = true
+        var animated = true
         
         if let lastSelectedAnnotation = selectedAnnotationView {
             lastSelectedAnnotation.isSelected = false
-            animation = false
+            animated = false
         }
         
         selectedAnnotationView = annotationView
@@ -122,6 +122,6 @@ final class MapManager {
         let coordinate = annotationView.coordinate
         
         delegate?.moveCamera(to: coordinate, zoom: mapView.mapboxMap.cameraState.zoom, updateAnnotations: false)
-        delegate?.showPopup(aqiNumber: number, at: coordinate, animation: animation)
+        delegate?.showPopup(aqiNumber: number, at: coordinate, animated: animated)
     }
 }

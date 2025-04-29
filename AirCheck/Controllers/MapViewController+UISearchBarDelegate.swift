@@ -11,14 +11,16 @@ extension MapViewController: UISearchBarDelegate {
         searchDebounceTimer?.invalidate()
         
         if textDidChange.isEmpty {
-            displayedSearchResults = KazakhstanCities.cities
+            displayedSearchResults = KazakhstanCities.getList()
             tableView.reloadData()
         } else if textDidChange.count >= 3 {
             searchDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
                 guard let self = self else { return }
                 self.fetchSearchResults(for: textDidChange) { locations in
-                    self.displayedSearchResults = locations
-                    self.tableView.reloadData()
+                    DispatchQueue.main.async {
+                        self.displayedSearchResults = locations
+                        self.tableView.reloadData()
+                    }
                 }
             }
         } else {
@@ -30,7 +32,7 @@ extension MapViewController: UISearchBarDelegate {
     func searchBarTextDidBeginEditing(_: UISearchBar) {
         hidePopup()
         uiSearchBar.setShowsCancelButton(true, animated: true)
-        displayedSearchResults = KazakhstanCities.cities
+        displayedSearchResults = KazakhstanCities.getList()
         tableView.reloadData()
         tableView.isHidden = false
     }

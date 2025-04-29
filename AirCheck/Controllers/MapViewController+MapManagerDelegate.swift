@@ -42,11 +42,11 @@ extension MapViewController: MapManagerDelegate {
         }
     }
     
-    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animation: Bool) {
+    func showPopup(aqiNumber: Int, at coordinate: CLLocationCoordinate2D, animated: Bool) {
         aqiPopupView.update(withAQI: aqiNumber)
         lastPopupCoordinate = coordinate
         
-        if animation {
+        if animated {
             self.aqiPopupView.isHidden = false
             aqiPopupView.transform = CGAffineTransform(translationX: 0, y: 150)
             aqiPopupView.isHidden = false

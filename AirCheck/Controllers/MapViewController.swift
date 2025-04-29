@@ -15,7 +15,7 @@ class MapViewController: UIViewController {
     
     var displayedSearchResults: [LocationModel] = []
     
-    private lazy var userLocationButton = UIButton()
+    private let userLocationButton = UIButton()
     private(set) var uiSearchBar = UISearchBar()
     private(set) var tableView = UITableView()
     
