@@ -12,7 +12,5 @@ import SwiftUI
 struct NearbyAirQualityWidgetBundle: WidgetBundle {
     var body: some Widget {
         NearbyAirQualityWidget()
-        NearbyAirQualityWidgetControl()
-        NearbyAirQualityWidgetLiveActivity()
     }
 }

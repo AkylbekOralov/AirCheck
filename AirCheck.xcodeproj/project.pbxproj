@@ -14,6 +14,7 @@
 		636E1B122D9285C80051AC01 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 636E1B112D9285C80051AC01 /* Alamofire */; };
 		63A17E8B2D95891B00257016 /* MapboxSearch in Frameworks */ = {isa = PBXBuildFile; productRef = 63A17E8A2D95891B00257016 /* MapboxSearch */; };
 		63A17E8D2D95891B00257016 /* MapboxSearchUI in Frameworks */ = {isa = PBXBuildFile; productRef = 63A17E8C2D95891B00257016 /* MapboxSearchUI */; };
+		63A1E16C2DFCA017009132D5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 63A1E16B2DFCA017009132D5 /* Alamofire */; };
 		63CA9EFE2D89EB08007B5340 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA9EFD2D89EB08007B5340 /* SnapKit */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +46,7 @@
 		6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NearbyAirQualityWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6330433D2DA7B6E40016C61F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		6330433F2DA7B6E40016C61F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		63A1E1672DFC93E0009132D5 /* NearbyAirQualityWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NearbyAirQualityWidgetExtension.entitlements; sourceTree = "<group>"; };
 		63CA9EC32D89E605007B5340 /* AirCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -89,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A1E16C2DFCA017009132D5 /* Alamofire in Frameworks */,
 				633043402DA7B6E40016C61F /* SwiftUI.framework in Frameworks */,
 				6330433E2DA7B6E40016C61F /* WidgetKit.framework in Frameworks */,
 			);
@@ -121,6 +124,7 @@
 		63CA9EBA2D89E605007B5340 = {
 			isa = PBXGroup;
 			children = (
+				63A1E1672DFC93E0009132D5 /* NearbyAirQualityWidgetExtension.entitlements */,
 				63CA9EC52D89E605007B5340 /* AirCheck */,
 				633043412DA7B6E40016C61F /* NearbyAirQualityWidget */,
 				6330433C2DA7B6E40016C61F /* Frameworks */,
@@ -157,6 +161,7 @@
 			);
 			name = NearbyAirQualityWidgetExtension;
 			packageProductDependencies = (
+				63A1E16B2DFCA017009132D5 /* Alamofire */,
 			);
 			productName = NearbyAirQualityWidgetExtension;
 			productReference = 6330433B2DA7B6E40016C61F /* NearbyAirQualityWidgetExtension.appex */;
@@ -283,6 +288,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = NearbyAirQualityWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4KXG88GL5W;
@@ -310,6 +316,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = NearbyAirQualityWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4KXG88GL5W;
@@ -337,6 +344,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AirCheck/AirCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4KXG88GL5W;
@@ -365,6 +373,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AirCheck/AirCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4KXG88GL5W;
@@ -594,6 +603,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 63A17E892D95891B00257016 /* XCRemoteSwiftPackageReference "search-ios" */;
 			productName = MapboxSearchUI;
+		};
+		63A1E16B2DFCA017009132D5 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 636E1B102D9285C80051AC01 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		63CA9EFD2D89EB08007B5340 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;

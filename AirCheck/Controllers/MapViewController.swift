@@ -99,6 +99,7 @@ extension MapViewController {
     @objc func centerMapOnUserLocation() {
         hidePopup()
         if let location = mapView.location.latestLocation {
+            saveUserLocation(location.coordinate)
             moveCamera(to: location.coordinate, zoom: 12, updateAnnotations: true)
         } else {
             _ = mapView.location.onLocationChange.observeNext { [weak self] locations in
@@ -106,6 +107,13 @@ extension MapViewController {
                 self?.moveCamera(to: coordinate, zoom: 12, updateAnnotations: true)
             }
         }
+    }
+    
+    func saveUserLocation(_ coordinate: CLLocationCoordinate2D) {
+        let defaults = UserDefaults(suiteName: "group.com.oralov.aircheck")
+        defaults?.set(coordinate.latitude, forKey: "latitude")
+        defaults?.set(coordinate.longitude, forKey: "longitude")
+        defaults?.synchronize()
     }
     
     // MARK: SearchBar Setup
