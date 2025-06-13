@@ -12,7 +12,7 @@ struct Provider: TimelineProvider {
     let nameDictionary = NameDictionary()
     
     func placeholder(in context: Context) -> AQIEntry {
-        AQIEntry(date: Date(), city: "Loading...", country: "", flag: "", aqius: 0)
+        AQIEntry(date: Date(), city: "Загрузка...", country: "", flag: "", aqi: 0)
         }
     
     func getSnapshot(in context: Context, completion: @escaping (AQIEntry) -> Void) {
@@ -45,12 +45,12 @@ struct Provider: TimelineProvider {
                         city: nameDictionary.cityTranslations[aqi.data.city] ?? aqi.data.city,
                         country: nameDictionary.countryTranslations[aqi.data.country] ?? aqi.data.country,
                         flag: nameDictionary.countryFlags[aqi.data.country] ?? "",
-                        aqius: aqi.data.current.pollution.aqius
+                        aqi: aqi.data.current.pollution.aqius
                     )
                     completion(entry)
                 case .failure(let error):
                     print("AQI fetch failed: \(error)")
-                    let fallback = AQIEntry(date: Date(), city: "Error", country: "", flag: "", aqius: 0)
+                    let fallback = AQIEntry(date: Date(), city: "Ошибка", country: "", flag: "", aqi: 0)
                     completion(fallback)
                 }
             }

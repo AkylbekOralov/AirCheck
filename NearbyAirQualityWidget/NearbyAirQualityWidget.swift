@@ -16,6 +16,7 @@ struct NearbyAirQualityWidget: Widget {
             NearbyAirQualityWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
+        .contentMarginsDisabled()
         .configurationDisplayName("Nearby Air Quality")
         .description("Shows your current location's coordinates.")
         .supportedFamilies([.systemSmall, .systemMedium]) // add/remove sizes as needed

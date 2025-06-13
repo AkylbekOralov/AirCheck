@@ -12,5 +12,5 @@ struct AQIEntry: TimelineEntry {
     let city: String
     let country: String
     let flag: String
-    let aqius: Int
+    let aqi: Int
 }
