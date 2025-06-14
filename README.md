@@ -1,6 +1,5 @@
 # AirCheck 💨
 
-## Overview
 This is an iOS app built with UIKit that shows real-time air quality (AQI) on an interactive Mapbox map. Users can view AQI near their location or search any place to check local air quality. A WidgetKit widget also displays nearby AQI right on the home screen.
 
 ## Why This Project
