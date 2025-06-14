@@ -10,47 +10,49 @@ import WidgetKit
 
 struct NearbyAirQualityWidgetEntryView : View {
     var entry: AQIEntry
+    
+    private let maxAQI: Double = 300
+    
+    var progress: Double {
+        min(Double(entry.aqi) / maxAQI, 1.0)
+    }
 
     var body: some View {
         ZStack {
-            backgroundForAQI(entry.aqi)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.city)
-                    .font(.system(size: 24, weight: .bold))
-                    .shadow(color: .black.opacity(0.4), radius: 1, x: 0, y: 1)
-
-                HStack(spacing: 8) {
-                    Text(entry.country)
-                    Text(entry.flag)
-                }
-                .font(.system(size: 16, weight: .medium))
-                .shadow(color: .black.opacity(0.4), radius: 1, x: 0, y: 1)
-                .padding(.bottom, 8)
-
-                Text("ИКВ: \(entry.aqi)")
-                    .font(.system(size: 24, weight: .medium))
-                    .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-        }
-    }
-
-    func backgroundForAQI(_ aqi: Int) -> LinearGradient {
-        switch aqi {
-        case 0..<51:
-            return LinearGradient(colors: [.green.opacity(0.3), .green], startPoint: .top, endPoint: .bottom)
-        case 51..<101:
-            return LinearGradient(colors: [.yellow.opacity(0.3), .orange], startPoint: .top, endPoint: .bottom)
-        case 101..<151:
-            return LinearGradient(colors: [.orange, .red], startPoint: .top, endPoint: .bottom)
-        case 151..<201:
-            return LinearGradient(colors: [.red, .purple], startPoint: .top, endPoint: .bottom)
-        default:
-            return LinearGradient(colors: [.purple, .black], startPoint: .top, endPoint: .bottom)
+            LinearGradient(
+                    gradient: Gradient(colors: [Color(.systemBackground), Color.blue.opacity(0.15)]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            
+            Circle()
+                .trim(from: 0.025, to: 0.8)
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: [.green, .yellow, .orange, .red, .purple, .brown, .brown, .brown, .brown, .black]),
+                        center: .center
+                    ),
+                    style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                )
+                .rotationEffect(.degrees(122))
+                .frame(width: 100, height: 100)
+            
+            Circle()
+                .stroke(Color.white,
+                        style: StrokeStyle(lineWidth: 4, lineCap: .square))
+                .frame(width: 12, height: 12)
+                .offset(y: 50)
+                .rotationEffect(.degrees(progress * 360))
+                .shadow(color: .white, radius: 1)
+            
+            Text("\(entry.aqi)")
+                .font(.system(size: 35, weight: .medium))
+                .foregroundColor(.black)
+                
+            Text("AQI")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(Color(red: 0, green: 0.01, blue: 0.4))
+                .offset(y: 42)
         }
     }
 }
